@@ -1,0 +1,56 @@
+\input{/usr/people/vapuser/latex/mydefs.tex}
+\input{/usr/people/vapuser/latex/idl/idldefs.tex}
+\documentclass{report}
+
+%\usepackage{multibox}
+\usepackage{alltt}
+
+\setlength{\parindent}{0in}
+\setlength{\parskip}{2mm}
+\title{foo bar baz}
+\author{W. H. Daffer}
+\date{\today}
+\begin{document}
+\maketitle
+
+\chapter{foo}
+
+% \begin{alltt}
+%   \prbf{IF \T THEN BEGIN}
+%     \EI{1}
+%     \EI{2}
+%     \EI{3}
+%   \prbf{ENDIF ELSE BEGIN}
+%     \EI{1}
+%     \EI{2}
+%     \EI{3}
+%   \prbf{ENDELSE}
+% \end{alltt}
+
+
+
+\begin{alltt}
+
+\textbf{IF a[0] eq 1 THEN BEGIN}
+  \textit{print,a}
+\textbf{ENDIF ELSE IF a[0] eq 2 BEGIN}
+  \textit{print,transpose(a)}
+\textbf{ENDIF ELSE BEGIN}
+  \textit{print,a*2}
+\textbf{ENDELSE}
+
+\end{alltt}
+
+
+\begin{alltt}
+
+\textit{ii=0}
+\textbf{WHILE ii lt n_elements(foo) DO BEGIN}
+  \textit{writeu, lun, foo[ii] }
+  \textit{ii=ii+1}
+\textbf{ENDWHILE}
+
+\end{alltt}
+
+
+\end{document}

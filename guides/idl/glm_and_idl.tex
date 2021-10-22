@@ -1,0 +1,61 @@
+\input{/users/whdaffer/latex/mydefs.tex}
+\input{/users/whdaffer/latex/idl/idldefs.tex}
+
+\NC{\BAT}{\begin{alltt}}
+\NC{\EAT}{\end{alltt}}
+
+
+%\input{/usr/people/vapuser/latex/mydefs.tex}
+%\input{/usr/people/vapuser/latex/idl/idldefs.tex}
+\documentclass[11pt,dvips]{report}
+%\usepackage{calc}
+%\usepackage{boxedminipage}
+\usepackage{alltt,makeidx}
+\usepackage[usenames]{color}
+\usepackage[none,bottom,light]{draftcopy}
+%\usepackage{helvetic}
+\usepackage{times}
+%\usepackage{courier}
+%\usepackage{zapfchan}
+%\usepackage{bookman}
+\usepackage{wasysym}
+\usepackage{listings}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{2mm}
+
+%% colors ------------------------------
+\definecolor{Light}{gray}{.80}
+\definecolor{Dark}{gray}{.20}
+\definecolor{IDLCommand}{gray}{.80}
+\definecolor{MyRed}{rgb}{0,0.5,0}
+\definecolor{IDLExampleColor}{rgb}{0.6,0.2,0.1}
+%% some useful macros
+
+\newenvironment{IDLExample}{%
+\begin{color}{IDLExampleColor} 
+}
+{
+\end{color}
+}
+
+
+\title{Some notes on IDL for Gloria}
+
+\author{W. H. Daffer}
+\date{\today \\
+        Copyright \copyright 2007}
+
+\makeindex
+\begin{document}
+\maketitle
+\newpage
+
+\tableofcontents
+
+\newpage
+\chapter{Conventions}
+\input{glm_conventions.tex}
+\chapter{Structures}
+\input{structures.tex}
+
+\end{document}

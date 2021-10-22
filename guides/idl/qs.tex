@@ -1,0 +1,54 @@
+%\input{/home/whdaffer/latex/mydefs.tex}
+%\input{/home/whdaffer/latex/idl/idldefs.tex}
+\input{/Users/whd/latex/mydefs.tex}
+\input{/Users/whd/latex/idl/idldefs.tex}
+\documentclass[11pt]{report}
+%\usepackage{calc}
+%\usepackage{boxedminipage}
+\usepackage{alltt,makeidx}
+\usepackage[none,bottom,light]{draftcopy}
+%\usepackage{helvetic}
+\usepackage{times}
+%\usepackage{courier}
+%\usepackage{zapfchan}
+%\usepackage{bookman}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{2mm}
+\title{Quick Start Guide to using IDL}
+
+\author{W. H. Daffer}
+\date{\today \\
+	Copyright \copyright 2005}
+
+\makeindex
+\begin{document}
+\maketitle
+\newpage
+
+\tableofcontents
+
+\newpage
+%\fontfamily{pcrb}
+%\selectfont
+\chapter{Conventions}
+\input{conventions.tex}
+\chapter{Learning IDL}
+\input{learning-idl.tex}
+\chapter{Quick Start}
+\input{quickstart.tex}
+\chapter{String Processing}
+\input{string-processing.tex}
+\chapter{File handling}
+\input{file-handling.tex}
+\chapter{More Examples}
+\input{examples.tex}
+
+
+%\listoffigures
+%\listoftables
+
+\addcontentsline{toc}{section}{Index}
+
+\input{qs.ind}
+
+\end{document}

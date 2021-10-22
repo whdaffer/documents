@@ -1,0 +1,54 @@
+\section{Vanilla File Handling}\ref{sec:vanilla-file-handling}
+
+\section{Searching}
+
+I'm only going to give you some of the most useful arguments/keywords
+to these routines, some of which have many. To learn more, look up the
+routines in the IDL help file under ``IDL Reference.''
+
+\IDL{files=file\_search(``search\_expression'')} 
+
+or 
+
+\IDL{files=file\_search(``directory'',''recursion\_pattern'')}
+
+In the first prototype you pass a file glob, whatever your native OS
+supports, like ``/path/to/source/files/*.c'' and IDL returns all the
+files that match that glob. You should be able to use any glob which the native OS supports, so for unix that means ``*'', ``?'', character classes like ``[abc]'' and alternatives like ``{a,b,c}''. For example
+
+\IDL{files=file\_search(``/path/to/my/source/files/*.{c,h}'')} 
+
+should find the C source and header files in that oddly named
+directory.
+
+In the second form you give a directory (or directories) and a pattern
+in the second argument. IDL recurses down the tree from each of the input directories looking for files which match the pattern. So \ldots
+
+\IDL{files=file\_search(``/path/to/my/source/files'', ``*.{c,h}'')} 
+
+would recurse down from ``/path/to/my/source/files'' finding all C
+source and header files and returning them in ``files''
+
+
+
+\section{Parsing File Names}
+
+\IDL{path=file\_basename(files)}
+
+Returns the file name, minus any paths. (IDL analog to the unix
+utility ``basename'')
+
+\IDL{path=file\_dirname(files)}
+
+The obverse of basename, return the ``path'' of each file.
+
+%\IDL{}
+
+
+\section{Widget Routines}
+
+\IDL{files=dialog\_pickfile(pattern[,path=''path'',/multi,/read,/write])}
+
+Pop up a widget with a file choosing dialog that allows you to
+navigate through the directory tree and choose one file or multiple
+files (if /multiple)

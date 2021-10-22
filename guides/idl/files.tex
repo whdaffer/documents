@@ -1,0 +1,215 @@
+\section{Files}\label{sec:Files}
+
+  It isn't long before one needs to write data to and read data from
+  some kind of file. This section addresses this need. 
+
+  There are three basic types of files in ascending order of
+  complexity. These are:
+
+  \begin{itemize}
+     \item \textbf{Text Files}
+     \item \textbf{Generic (i.e. flat) Binary Files}
+     \item \textbf{HDF/NCDF Files}
+  \end{itemize}
+
+  Again, I'm going to assume that we're working on a Unix
+  system. Those using Windows, Mac or VMS will have to read
+  the online help. Nothing I'm going to write will be wrong for these
+  operating systems, but there are other argument that add to the
+  functionality for Windows and Mac users.
+
+\subsection{General Commands}\label{sec:GeneralIOCommands}
+
+
+  Files, whether text, which RSI calls \textit{formatted} data, or
+  Generic binary files, which RSI calls \textit{unformatted} data (but
+  not the HDF/NCDF type!) files are opened, read and written with the
+  same set of commands. One opens them with the \IDLBUILTIN{openX}
+  suite of commands. One reads them using \IDLBUILTIN{readX} and
+  writes them with either \IDLBUILTIN{printf}, for
+  \textit{formatted} data or \IDLBUILTIN{writeu} for
+  \textit{unformated} data. The ``X'' varies depending on the
+  particular command, X = ``r'', ``w'' or ``u'' in the case of
+  ``open'' and X = ``f'' or ``u'' in the case of read. The particulars
+  are:
+
+  \begin{itemize}
+     \item \textbf{open}
+
+	Prototype: openX, filename, logical\_unit\_number [, \$\\
+	   record\_length, \$\\
+   	    error=error, /get\_lun \ldots ]
+
+        X = ``r'', ``w'' or ``u''
+
+	\begin{enumerate}
+	  \item \textit{R} Read:
+
+	     Open the file for reading. Doesn't matter whether the
+             data is text of binary, that element of the operation is
+             covered  by which builtin you use to read the data.
+
+
+	  \item \textit{W} Write:
+
+	     Open the file for writing. If the file doesn't exist
+             it's created, if it does it's zeroed out. 
+
+             Again, it doesn't matter whether the data is text of
+             binary, that element of the operation is covered by which
+             builtin you use to write the data.
+
+	  \item \textit{U} Update: 
+
+	     Open the file for updating. One may both read and write
+             to the file. The file pointer is set to the beginning of
+             the file.
+
+	\end{enumerate}
+
+	Required arguments:
+
+	\begin{description}
+
+  	  \item \textit{filename} A scalar string, giving the name of
+            the file you want to open.
+
+  	  \item \textit{logical\_unit\_number}
+
+	    The ``logical\_unit\_number'', hereinafter LUN, is the
+	    logical entity used by IDL to communicate with the
+	    file. One can either give a hardcoded LUN, (e.g. openr, 1,
+	    file) the \textbf{bad} way to do it, or get a LUN from the
+	    store of them maintained by the interpreter using
+	    \IDLBUILTIN{get\_lun}. One may also give the /get\_lun
+	    keyword in the call to open, which is equivalent to
+	    calling \IDLBUILTIN{get\_lun, lun} before the call to
+	    \IDLBUILTIN{open}. One returns the LUN back to the pool
+	    with \IDLBUILTIN{free\_lun, lun1, lun2, \ldots}. There are
+	    only 128 LUNs, so it's not inconceivable that a process
+	    can run out of them.
+
+	    If the LUN is allocated via \IDLBUILTIN{get\_lun} then
+	    calling \IDLBUILTIN{CLOSE,/all}, in addition to closing
+	    all files, will also deallocate all such LUNs.
+
+	\end{description}
+
+	Optional arguments or keywords, but a \textbf{really, really}
+	good idea!
+ 
+	\begin{description}
+	  \item \textit{/get\_lun}
+
+	   Make open get a LUN from the store and put it into the
+     	   named variable ``logical\_unit\_number'' in the argument list.
+
+  	  \item \textit{error = error} 
+	   A named variable into which open returns the error code
+	   which may result during the open.
+
+	   If one doesn't do this and an error does occur, the default
+   	   error catching mechanism takes over. I think it's good
+	   practice to try and capture errors and handle them
+	   explicitly; you may disagree. 
+
+	   However, if you do use this keyword, you \textit{must}
+	   check the value of error immediately after the call to
+	   open. This is because \IDLBUILTIN{open} is silent about
+	   its failure when the ``error=error'' keyword argumentation
+	   is used.
+
+	   error != 0 is \textbf{bad}, The particulars of the error is
+	   stored in the system variable !error\_state, which is a
+	   structure containing lots of information, in particular a
+	   text string gives a little description and it's in
+	   !error\_state.msg
+
+           My standard way of opening a file (say for reading) is:
+
+
+\begin{alltt}
+openr, lun, file, /get_lun, error=error
+if error ne 0 then begin 
+  Message,!error_state.msg
+  \vdots
+  ;Do something or run-away!
+endif 
+\end{alltt}
+
+
+
+          This sort of approach can be combined with
+	   \IDLBUILTIN{catch} to eliminate the if-then-begin block and
+	   to get a more generic form of error catching mechanism. See
+	   section ~\ref{sec:ErrorHandling} for more information on
+	   this approach. For instance, I'll do the following:
+
+
+
+\begin{alltt}
+catch, error
+if error ne 0 then begin 
+  Message,!error_state.msg,/continue
+  return
+endif 
+     \vdots
+
+openr, lun, file, /get_lun, error=err
+if err ne 0 then Message,!error_state.msg,/noname
+
+     \vdots
+;File successfully opened!
+    \vdots
+
+\end{alltt}
+
+
+          In this case, the procedure is exited via the ``return''
+	   inside the ``catch'' block, control is passed there after
+	   the unsuccessful open by the call to \IDLBUILTIN{message}.
+
+	\end{description}
+
+
+	
+
+	There are many other keywords to the \IDLBUILTIN{open}
+        command; I'll leave you to find out about them.
+
+
+	Other significant open keywords:
+
+	\begin{description}
+
+	  \item \textit{Append} Places the file pointer is set to the
+           end of the file. Normally the file pointer is placed at the
+           beginning of the file. If used with \IDLBUILTIN{openw} this
+           prevents IDL from truncating the file
+
+          \item \textit{SWAP\_IF\_BIG\_ENDIAN}
+
+          If the machine you're issueing the open command on is Big
+          Endian, byteswap multi-byte data as it's being read.
+
+          \item \textit{SWAP\_IF\_LITTLE\_ENDIAN}
+	
+	  Same as SWAP\_IF\_BIG\_ENDIAN, mutatis mutandis.
+
+	  \item \textit{COMPRESS}
+
+	  Read and write the data in ``gzip'' format. Incompatible
+          with /APPEND.
+
+	\end{description}
+     \item \textbf{read}
+     \item \textbf{print/write}
+  \end{itemize}
+
+   
+
+\subsection{Text Files}\label{sec:TextFiles}
+  
+\subsection{Binary Files}\label{sec:BinaryFiles}
+\subsection{HDF Files}\label{sec:HDF Files}
+\subsection{NCDF Files}\label{sec:NCDF Files}

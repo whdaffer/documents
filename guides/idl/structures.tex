@@ -1,0 +1,1021 @@
+\section{Structures}\label{sec:Structures}
+
+A structure is a container of heterogeneous data types where each item
+in the structure (which I will call ``tags'' or ``elements'') has a
+name.  It is by using that name (i.e. the ``tag'') that you reference
+that item in the structure, as opposed, say, to an item in an array,
+which must be referenced by an index. The thing you get by referencing
+that name may any legitimate type of IDL data, including other
+structures. I call that thing the tag's ``value''.
+
+I call those tags whose value is in the standard set of IDL data types
+(e.g.  byte, int, long, float, string, \ldots, etc.) ``atomic'' types
+and other types ``derived'' types. Structures themselves are a
+``derived'' type. 
+
+
+I will sometimes call IDL variables that are structures ``structure
+variables.''
+
+\subsection{Defining Structures}
+
+You may define a structure in one of three ways:
+
+\bi 
+  \item {explicitily}
+  \item {By using Create\_Struct function}
+  \item {``automatic'' definition (the \_\_define method)}
+    
+    This last method is more of an adjunct to the ``explicit'' method
+    of structure definition, since any structure defined in this way
+    is actually defined using one of the previous two
+    methods.
+
+  \ei
+
+\subsubsection{Explicit definition of a structure}
+
+
+There are two types of structures: anonymous and named. In their
+definition they differ in only one particular, but that difference has
+some fairly important implications for their use which will be
+discussed later.
+
+To define an \textbf{anonymous} structure explicitly, issue the
+following sort of statement to the interpreter.
+
+\begin{IDLExample}
+\begin{verbatim}
+   AnonStruct={tag1: val1, $
+               tag2: val2[,...] }
+
+\end{verbatim}
+\end{IDLExample}
+
+
+To define a \textbf{named} structure explicitly you do the exact same
+thing, but you include a ``name'' before any of the tag/value pairs,
+as in \ldots 
+
+
+\begin{IDLExample}
+\begin{verbatim}
+
+  NamedStruct={Struct_name, tag1: val1, $
+                             tag2: val2[,...] }
+\end{verbatim}
+\end{IDLExample}
+
+In these definitions, the \ldots
+
+\be
+
+\item tag\textit{N}. Is any legitimate IDL variable name which must
+  \textbf{not} begin with a number and may consist of nothing but
+  letters, numbers and underscores.\footnote{Okay, so you can put \$-signs in
+  variable names too, but why would one do such a thing?}  It is a
+  \textbf{bare word, not a quoted string!}
+
+\item : is the delimiter between the identifier (``tagN'') and its value.
+
+\item val\textit{N}. Is any legitimate IDL variable generator.
+
+  namely  \ldots 
+
+  \bi
+
+  \item constant expressions (e.g. 0, 1, [0,1,2,3], 'a string', \ldots, etc)
+  \item array generators (e.g. \textit{fltarr()}, \textit{lonarr()}, \textit{replicate()},\ldots,etc.)
+  \item index generators (e.g. \textit{indgen()},\textit{findgen()}, \ldots,etc.)
+  \item Pointer/Objects creation routines (e.g. \textit{\LB ptr,obj\RB\_new()})
+  \item make\_array()
+  \item create\_struct()
+
+  \ei
+
+\ee
+
+
+
+
+Most of the time you'll only use the first three and, in fact, 90\% of
+the time you'll only use the first two. But, in general, any thing
+which returns a valid IDL variable (including functions calls) can be
+used as the ``value'' part of a structure definition.
+
+\subsubsection{Examples}
+
+Define an anonymous structure with five tags, the first is a string
+(for a filename), the second is a long integer (say, for a number of
+the form YYYYMMDD), the third is a float (say for the seconds in the
+day), the fourth and fifth are float arrays of 100 elements, (say for
+an array of data on pressures surfaces with the fifth array being the
+pressure surfaces)
+
+\begin{IDLExample}
+\begin{verbatim}
+  struct = { file: '', $
+             day: 0l, $
+             time: 0.0, $
+             data: fltarr(100), $
+             levels: fltarr(100) }
+\end{verbatim}
+\end{IDLExample}
+
+To define the same array, but give it the name ``dailymean'', (you'll
+find out later why naming structures might be useful) you'd do almost
+the same thing.
+
+
+
+\begin{IDLExample}
+\begin{verbatim}
+  struct = { dailymean, $
+             file: '', $
+             day: 0l, $
+             time: 0.0, $
+             data: fltarr(100), $
+             levels: fltarr(100) }
+\end{verbatim}
+\end{IDLExample}
+
+That is, the first part of the structure is not a name:value pair, but
+is a single bareword (not quoted) that will become the name of the
+strucutre.
+
+To set the fields in the structure (whether named or not), you simply
+address each tag by prepending the variable name that holds that
+structure using a dot separator.
+
+\begin{IDLExample}
+\begin{verbatim}
+  struct.file='Afile'
+  struct.day=20040101L
+  struct.time=3600.05
+  struct.data=__the_data__
+ struct.levels=__the_levels__
+\end{verbatim}
+\end{IDLExample}
+
+
+Tags within structure are themselves allowed to be structures. To
+define such a structure, you simply set the ``value'' field for that
+tag in the definition using one of the three methods of structure
+definition given above or to a variable which is a structure. (This is
+a circumstance where the ``automatic'' definition is helpful, more on
+this later)
+
+You may do this \ldots
+
+\bi 
+
+  \item Explicitly
+
+\begin{IDLExample}
+\begin{verbatim}
+  struct = { file: '', $
+              day: 0l, $
+              time: 0.0, $
+              data : {levels: fltarr(100), $
+                       species_data: fltarr(100)}}
+\end{verbatim}
+\end{IDLExample}
+
+You can see here that I just stuck a structure definition right in the
+``value'' field of the outer structure definition. ``struct.data'' is
+a structure having two fields, ``levels'' and ``species\_data'', each
+a 100 elements float array.
+
+  \item Using an already defined variable
+
+
+\begin{IDLExample}
+\begin{verbatim}
+  interior_struct = { levels: fltarr(100), $
+                       species_data: fltarr(100)}
+  struct = { file: '', $
+              day: 0l, $
+              time: 0.0, $
+              data : interior_struct }
+\end{verbatim}
+\end{IDLExample}
+
+Here I defined a variable (``interior\_struct'') first and then used
+that to set the value of the ``data'' tag.
+
+  \item Using a call to a function that returns a structure
+    
+    I don't find much use for this method for structures, but to do
+    what I just did in the previous example using the IDL builtin
+    ``Create\_Struct()'' one would do \ldots
+
+
+
+\begin{IDLExample}
+\begin{verbatim}
+  interior_struct = { levels: fltarr(100), $
+                       species_data: fltarr(100)}
+  struct = { file: '', $
+              day: 0l, $
+              time: 0.0, $
+              data : create_struct('levels',fltarr(100),$
+                                   'species_data', fltarr(100)) }
+\end{verbatim}
+\end{IDLExample}
+
+  I'll cover Create\_Struct() in a bit.
+
+
+\ei
+
+To access the tags of a structure, you simple ``.''-prepend the name of the
+variable containing the structure to the field you want to access.
+
+Using the last definition given
+
+\begin{IDLExample}
+\begin{verbatim}
+  time=struct.time
+  day=struct.day
+\end{verbatim}
+\end{IDLExample}
+
+
+
+Accessing the tags of a structure element which is itself a structure
+follows the same rules as accessing the tag of the topmost structure,
+except that now you must prepend the name of all intervening fields
+down to the tag of interest in a dot seperated list.
+
+To access the ``levels'' of the interior\_struct, you'd use
+
+\IDL{levels=struct.data.levels}
+
+to fetch out the ``species\_data'' field, use
+
+\IDL{species=struct.data.species\_data}
+
+You can, of course, pull out the internal structure to its own
+structured variable, as in \ldots
+
+\IDL{instruct=struct.data}
+
+And then use that to access the ``levels'' and ``species\_data'' tags,
+but now through the ``instruct'' structure, as in
+
+
+\begin{IDLExample}
+\begin{verbatim}
+species=instruct.species\_data
+levels=instruct.levels
+\end{verbatim}
+\end{IDLExample}
+
+
+
+Just as you can create arrays of floats or arrays of integers, you can
+also create arrays of structures. There is no ``array of structures''
+creation routines in IDL analogous to \textit{fltarr} or
+\textit{lonarr}; the only way I know of how to make arrays of
+structures is to use \textit{replicate()} on an already existing
+structure variable or to put the definition routine inside the call to
+\textit{replicate()}.
+
+Using the former method, say we took the structure in the last example
+and made an array of 31 structures. Having defined it above, I'd
+execute the following to create my array
+
+\IDL{array\_of\_structs=replicate(struct,31)}
+
+To investigate the structure of this thing, I'll use help and help,/struct
+
+\begin{IDLExample}
+\begin{verbatim}
+
+IDL> help,array_OF_structs,/st
+** Structure <89bb97c>, 4 tags, length=820, data length=820, refs=3:
+   FILE            STRING    ''
+   DAY             LONG                 0
+   TIME            FLOAT           0.00000
+   DATA            STRUCT    -> <Anonymous> Array[1]
+IDL> help,array_OF_structs
+ARRAY_OF_STRUCTS
+                STRUCT    = -> <Anonymous> Array[31]
+
+\end{verbatim}
+\end{IDLExample}
+  
+You access arrays of structures just as you do arrays of floats, but
+what you get out depends on whether you access down to a tag that is
+an atomic data type (e.g. a float) or whether the tag you access is
+itself a structure.
+
+For example, using
+
+\begin{IDLExample}
+\begin{verbatim}
+
+IDL> foo=array_OF_structs[3].data
+IDL> help,foo
+FOO             STRUCT    = -> <Anonymous> Array[1]
+IDL> help,foo,/st
+** Structure <8d81914>, 2 tags, length=800, data length=800, refs=3:
+   LEVELS          FLOAT     Array[100]
+   SPECIES_DATA    FLOAT     Array[100]
+\end{verbatim}
+\end{IDLExample}
+
+We see that ``foo'' is a structure variable equivalent to the 4-th
+entry in ``array\_of\_structs'', however 
+
+\begin{IDLExample}
+\begin{verbatim}
+IDL> foo=array_OF_structs[3].data.levels
+IDL> help,foo
+  FOO             FLOAT     = Array[100]
+\end{verbatim}
+\end{IDLExample}
+
+Is the ``levels'' tag of that same structured variable, a 100 element
+float array.
+
+
+\subsubsection{Named versus anonymous structures}
+
+The principle difference between the two is that once you've created a
+named structure you can then use another syntax for creating more
+instances of that structure, even if there is no variable around of
+that type. This isn't true for anonymous structures, in order to
+replicate them, you need an existing instance. 
+
+When you create an anonymous structure IDL gives it some strange name,
+it's what appears inside the angled bracket in the output from help.
+That's there because IDL has to call it something, but in all other
+ways that I know, that string is completely useless.  
+
+When you create the named structure, however, IDL knows it by it's
+name and you can use that name to create other structures, even if
+you're no longer in the scope where you created the structure of that
+name.  The names of structures are ``global.''
+
+This also means that you can't change the structure of a named
+structure in any IDL session once that named structure has been
+instantiated: once one instance of a named structure is created in a
+given IDL session, its structure is fixed until the end of the IDL
+session. To change it you must exit IDL, make the changes, get back in
+and re-instantiate the named structure.
+
+To see how this other ``instantiation'' semantics work, using the
+example at the very beginning where I created a structure named
+``dailymean'' (That's not the name of the \textbf{variable}, mind you,
+but the name of the \textbf{structure}) to create another instance of
+that structure one needs only say.
+
+\IDL{newinstance=\{dailymean\}}
+
+If you want an array of them, do
+
+\IDL{newinstance=replicate(\{dailymean\},n1$[$,n2,...$]$)}
+  
+where n1 $[$,n2,...$]$ are the dimensions of the array (Like any IDL
+array, there can be eight dimensions)
+
+Why would anyone want to create named structures? Normally, one
+doesn't need to, but there are two important cases where one does want
+to create named structures.
+
+\bi
+  \item ``Automatic Structure Instantiation''
+    
+    If one creates a file having one procedure that defines a named
+    structure and the name of the file and the procedure is the name
+    of the structure + ``\_\_define.pro'' then one may use the
+    semantics I used above to automatically create an instance of that
+    structure and IDL will know what to do: it will find the file,
+    compile it, run it (thereby creating the structure definition) and
+    return the requested instance to you.
+
+    For example: consider the following very simple source file.
+
+\begin{IDLExample}
+\begin{verbatim}    
+-- cut here -- cut here -- cut here -- cut here 
+PRO foo__define
+  junk={foo, a:0l, b:''}
+END 
+-- cut here -- cut here -- cut here -- cut here 
+\end{verbatim}
+\end{IDLExample}
+
+
+Say that source code is stored somewhere in your IDL path in a file
+named foo\_\_define.pro
+
+Then, when you run \IDL{afoo=\{foo\}}
+
+IDL will find foo\_\_define.pro, compile it, run it (which creates the
+structure definition ``foo'') and then return an instance of that
+structure into the variable ``afoo''
+
+
+  \item ``Object Oriented code''
+    
+    An object in IDL is just a named structure definition along with
+    some procedures and methods to operate on the data. The structure
+    definition follows all the rules discussed above.
+
+   This is the last I'll be saying about IDL objects.
+
+\ei
+
+\subsubsection{Nested Structures}
+
+Okay, so why would anyone want to make nested structures? I can think
+of several reasons. For example, you might want to create a structure
+to store all the data in a particular file. Say that the file, like
+HALOE data, comes in files that are a month long and that all the data
+is one a fixed grid having 100 levels and that there are no more than
+30 profiles in any one day.  To make accessing it a little easier,
+perhaps we could make a structure of structures, the lowest level
+containing one profile, the next level up,which contains one day of
+data, being an array of those structures plus some other information
+and the top most level being an array of day structures plus some
+other information.
+
+So it might look something like this
+
+\begin{IDLExample}\begin{verbatim}
+  one_profile= {time:0.0d, lat:0.0, lon:0.0, $
+                   data: fltarr(100), $
+                   error: fltarr(100)}
+
+  one_day    = {day:0,  nprofs:0l, $
+                    profiles : replicate(one_profile,30)}
+
+  the_file   = {filename:'', ndays:0l, $
+                  levels:fltarr(100), $
+                   days: replicate(one_day,31)}
+\end{verbatim}\end{IDLExample}
+
+
+One could take two approachs to filling and using this nested
+structure. We could keep a pointer to the current slot in each of the
+different parts -- we'd need two, one for the ``day'' and one for the
+``profile'' of the day -- and then only fill up only the part of the
+structure that we need for each file we read.
+
+On the other hand\ldots 
+
+Since we've already allocated space which may not be taken up with any
+real data (since some months don't have 31 days) we could simply stick
+day ``N'' into the ``N-1'' slot in the structure and then, when it
+came time to pull day out all we need is to know which ``day of the
+month'' it is.
+
+Which you choose is up to you, but it will have an effect on how one
+accesses the data. Assuming you wanted the data from the 2nd day of
+the month, in the first approach one would so something like this \ldots
+
+\begin{IDLExample}\begin{verbatim}
+  ptr=where(the_file.days eq 2,nptr)
+  if nptr ne 0 then begin 
+    this_day=the_file.days[ptr]
+    lat=this_day.lat
+    lon=this_day.lon
+    time=this_day.time
+    nprofs=this_day.nprofs
+    profiles=this_day.profiles[0:nprofs-1]
+    ... 
+    ; do stuff here 
+    ...
+  endif 
+\end{verbatim}\end{IDLExample}
+
+
+But if you used the second approach, it would be as simple as \ldots
+
+\begin{IDLExample}\begin{verbatim}
+  if the_file.days[2].nprofs ne 0 then begin 
+    this_day=the_file.days[2]
+    lat=this_day.lat
+    lon=this_day.lon
+    time=this_day.time
+    nprofs=this_day.nprofs
+    profiles=this_day.profiles[0:nprofs-1]
+    ... 
+    ; do stuff here 
+    ...
+  endif 
+\end{verbatim}\end{IDLExample}
+
+To make either of these work, you'd have to be careful to clean out
+the data structure to make sure you didn't reuse data from previous
+reads, assuming you read more than one file. For instance, one could
+set
+
+\begin{IDLExample}\begin{verbatim}
+  the_file.days=0
+  the_file.days.nprofs=0
+\end{verbatim}\end{IDLExample}
+
+between reads.
+
+
+
+\newpage
+\subsection{Common Gotchas}
+
+\subsubsection{Order of indices}
+
+One of the things I found most confusing things when I first started
+using more complicated structures that had arrays of (sub)structures
+is the fact that the order of indices seemed switched around depending
+on whether you're accessing the data directly from the structure
+variable, or whether you've pulled out part of the substructure into
+its own variable.
+
+To see this effect, I'll create a structure with a float array of 10
+elements and then replicate it to an array of structures having 20
+elements and we'll see how the order of the indices works out
+
+\begin{IDLExample}\begin{verbatim}
+
+  IDL> a = {b: fltarr(10)}
+
+  IDL> c = replicate(a,20)
+
+  IDL> help,c,/st
+  ** Structure <82606f4>, 1 tags, length=40, data length=40, refs=2:
+     B               FLOAT     Array[10]
+
+  IDL> help,c
+  C               STRUCT    = -> <Anonymous> Array[20]
+
+  IDL> d=c.b
+
+  IDL> help,d
+  D               FLOAT     = Array[10, 20]
+  IDL> 
+
+
+\end{verbatim}\end{IDLExample}
+
+
+So, ``a'' is a simple structure containing one element, a 10 element
+float array named ``b'' and ``c'' is an array of the ``a'' structures,
+there being 20 of them. 
+
+If I were to fetch the 4th element of the array in the 3rd element of
+``c'', that is, accessing the element directly by referencing the
+structure itself, I'd do the following
+
+\IDL{d\_4th\_of\_3rd=c[2].b[3]}
+
+What happens when I just pull the whole array out, how does the order
+of indices work out? Is it 10 by 20 or 20 by 10?
+
+
+The answer is that IDL creates a 10 by 20 array.
+
+Now it might look more sensible for it to be a 20 by 10 element array,
+since that's the arrangement of the data structures involved, a 20
+element replication of a structure containing a 10 element array, but
+there's a reason IDL does it the other way around: memory order.
+
+In IDL, the memory order of elements goes from the left most index to
+the right most index, (e.g. a\LSB*,n\RSB is in memory order,
+a$[$n,*$]$ isn't). I don't know this for a certainty, not having been
+present when these matters were discussed, but it makes sense to think
+that the designers reasoned in the following way: The user created a
+structure with a 10 element vector, it stands to reason that the user
+wanted that block of data to be integral and in memory order since
+they put it all in one place. So when creating an array out of the
+array of structures, those 10 element segments ought to be in memory
+order, so in the resulting array the 10 has to come first in the list
+of dimensions.
+
+You can see what shape the resulting array will have with help,
+without actually doing the extraction (and thereby increasing memory
+usage).
+
+
+\begin{IDLExample}\begin{verbatim}
+
+IDL> help,c.b
+<Expression>    FLOAT     = Array[10, 20]
+
+\end{verbatim}
+\end{IDLExample}
+
+But now that we have pulled it out (as I did above when creating the
+variable ``d'' above)...
+
+If you wanted to grab the same element out of this array as we did
+above, where we accessed it directly in the structure, you'd do this
+
+
+\IDL{d\_4th\_of\_3rd=d[3,2]}
+
+There you see the ``reversal'' I'm talking about.
+
+A slightly more complicated case, involving some intervening structure\ldots
+
+\begin{IDLExample}\begin{verbatim}
+
+  IDL> a={b:fltarr(2)}
+  IDL> d={c:replicate(a,3)}
+  IDL> e=replicate(d,4)
+
+  IDL> help,e,/st
+  ** Structure <8260884>, 1 tags, length=24, data length=24, refs=2:
+     C               STRUCT    -> <Anonymous> Array[3]
+
+  IDL> help,e.c,/st
+  ** Structure <826094c>, 1 tags, length=8, data length=8, refs=4:
+     B               FLOAT     Array[2]
+
+  IDL> help,e.c.b,/st
+  <Expression>    FLOAT     = Array[2, 3, 4]
+
+
+\end{verbatim}\end{IDLExample}
+
+
+Here we have a variable (E) that's an 4 element array of a structure (D)
+which has a field (C) which is an array of a structure (A) containing
+one field (B) that is a 2 vector. And when ``b'' is pulled out without
+any indexing at all, the dimension of the resulting array is the
+reverse of the data structure: the variable goes 2,3,4 but the data
+structure is 4, 3, 2.
+
+I haven't confirmed this completely, but I'd be very surprised if this
+wasn't the general rule, even when you start doing slices: the
+outer-most dimension is the last when you pull the array out, while
+the inner-most is the first and the dimensions run in order from inner
+(left-most) to outer(right-most)
+
+As the last (I promise) rather complicated example of this effect,
+using slices, consider \ldots
+
+
+\begin{IDLExample}\begin{verbatim}
+
+
+
+  IDL> a={b: fltarr(10)}
+  IDL> c=replicate(a,100)
+  IDL> d=replicate({e:c},1000)
+
+  IDL> help,d
+  D               STRUCT    = -> <Anonymous> Array[1000]
+
+  IDL> help,d,/st
+  ** Structure <8260cac>, 1 tags, length=4000, data length=4000, refs=1:
+     E               STRUCT    -> <Anonymous> Array[100]
+
+  IDL> help,d.e,/st
+  ** Structure <8261174>, 1 tags, length=40, data length=40, refs=4:
+     B               FLOAT     Array[10]
+
+  IDL> help,d.e.b,/st
+  <Expression>    FLOAT     = Array[10, 100, 1000]
+
+  IDL> help,d[0:998].e[0:98].b[0:8]
+  <Expression>    FLOAT     = Array[9, 99, 999]
+
+
+\end{verbatim}\end{IDLExample}
+
+
+And sure enough, the order runs inner to outer.
+
+
+
+\newpage
+\subsection{Using Structures}
+Aside from defining and accessing structures, which I've pretty much
+covered, there are only a few more things to do.
+
+\be
+  \item Find the names of the tags of a structure
+
+     \IDL{ntags=n\_tags(a\_structured\_variable)}
+       
+       Will return the number of tags (i.e. fields) in a structure. It
+       only returns the number of tags in the variable passed. If any
+       of these are structures themselves, you have to descend into
+       and ask about those to find out how many tags the sub-structure
+       has.
+       
+       n\_tags() has two odd keywords that will tell you the
+       ``length'' of the array. One is /length and the other is
+       /data\_length.  You might think they would be the same, but on
+       some (most?)  machines the CPU pads structures so that things
+       fall on certain boundaries. To see the effect, consider the
+       following.
+
+       \begin{IDLExample}\begin{verbatim}
+
+  IDL> a={b:0b,i:0,l:0L}
+  IDL> help,a
+  A               STRUCT    = -> <Anonymous> Array[1]
+  IDL> help,a,/st
+  ** Structure <84ad78c>, 3 tags, length=8, data length=7, refs=1:
+     B               BYTE         0
+     I               INT              0
+     L               LONG                 0
+  IDL> print,n_tags(a,/length)
+             8
+  IDL> print,n_tags(a,/data_length)
+             7
+\end{verbatim}\end{IDLExample}
+           
+           Adding up the lengths of the various items, 1 + 2 + 4=7, so
+           if you wrote this structure out to disk and then did an
+           ``ls -al'' on the resulting file, it would be 7 bytes long.
+
+     Why is this important? 
+     
+     Say you have a structure that you know maps to a file and you
+     have size of the file, but you don't know how many records are in
+     it. To read it quickly you want to replicate the structure to the
+     proper number of records and read the file in one
+     ``readu,\ldots'' and to find that number you need to know the 
+     \textbf{unpadded length} of the structure: size\_of\_file/size\_of\_rec = nrecs.
+
+     You get that with n\_tags(,/data\_length)
+
+     \item Find the names of the tags in a structure
+
+     \IDL{tagnames = tag\_names(a\_structured\_variable)}
+     
+     will return the ``names'' of the tags. Just as in n\_tags() it
+     only returns the names of the variable passed it, it doesn't
+     recurse down the structure.
+
+  \item Find the types of things those tags are
+    
+    As with any IDL variable, you can find out information about it
+    with ``size''
+
+    \IDL{type=size(a\_variable,/TNAME)} 
+    
+    Will return a string giving the ``type'' of ``a\_variable.'' In
+    the case of the top-level structured variable, this wouldn't be
+    very interesting, since we would already know (presumably) that it
+    was a structure.\footnote{although sometimes I use it to check the
+    returns of routines that return structure on success and
+    something else on failure} But you might want to ask what kind
+    of data the    fields of the structure were. Combined with n\_tags() and a manner
+    of accessing fields of a structure which I'm about to describe,
+    you could use this to descend into the structure, asking about the
+    type of data each field was.
+    
+    The ``TNAME''s returned are in Table 3-116 of the IDL online help
+    file, but I'll repeat it here as well.
+
+
+\begin{center}
+\begin{tabular}{||c|c|c|} \hline
+Type Code & Type Name & Data Type \\ \hline
+0  & UNDEFINED & Undefined \\
+1  & BYTE     & Byte       \\
+2  & INT      & Integer    \\                 
+3  & LONG     & Longword integer \\
+4  & FLOAT    & Floating point   \\         
+5  & DOUBLE   & Double-precision floating \\
+6  & COMPLEX  & Complex floating          \\
+7  & STRING   & String                     \\
+8  & STRUCT   & Structure                  \\
+9  & DCOMPLEX & Double-precision complex \\
+10 & POINTER  & Pointer \\
+11 & OBJREF   & Object reference \\
+12 & UINT     & Unsigned Integer \\
+13 & ULONG    & Unsigned Longword Integer \\
+14 & LONG64   & 64-bit Integer \\
+15 & ULONG64  &  Unsigned 64-bit Integer \\ \hline
+\end{tabular}
+\end{center}
+
+The string returned is the second column. You can also use the /type
+keyword and compare against the entries of the first column.
+
+So if you want to check that something is a structure, you can do the following
+
+\IDL{if size(variable,/tname) eq 'STRUCT' then \ldots do something\ldots}
+
+
+
+  \item Alternate ways of accessing the tags of a structure
+    
+    You may also access the tags of a structure by index rather than
+    by name. I use this sort of thing all the time when I write code
+    to access arbitrary structures whose field names I don't know a
+    priori. You'd be surprised how useful this approach can be.
+    
+    So, to access the 3rd field in a structure, do
+
+   \IDL{field3=a\_structured\_variable.(2)}
+
+   
+   If you know the name of the field at run time (but not at compile
+   time) you can access the field by doing something like 
+
+\begin{IDLExample}\begin{verbatim}   
+   tags=tag_names(a_structured_variable)
+   x=where(tags eq 'the_field_you_want_as_a_string',nx)
+   if nx ne 0 then data=a_structured_variable.(x[0]) else signal_an_error
+\end{verbatim}\end{IDLExample}   
+
+    The order of the fields in an array is the same as the order
+    returned by the tag\_names() builtin.
+
+  \item The function Create\_Struct()
+    
+    The IDL builtin function Create\_struct() can be used to create
+    and modify structures. It has two prototypes.
+
+\begin{IDLExample}\begin{verbatim}
+   Result = CREATE_STRUCT( [Tag1, Values1, ..., Tagn, Valuesn] $
+                              [, Structuresn] $
+                              [, NAME=string]) 
+  Result = CREATE_STRUCT( [Tags, Values1, ..., Valuesn] $
+                            [, Structuresn] $
+                            [, NAME=string]) 
+
+\end{verbatim}\end{IDLExample}
+
+In the first, you alternate the ``name'' of the field (the ``tag'')
+with each tag's value. In the latter you give an array of tag names and
+then the values, which match up one-to-one. The ``Structuresn''
+parameter is where you pass an already existing structure and IDL
+returns that structure with the new tags/values added. It puts the
+tags in front if you pass the tag/value pairs first and at the end if
+you put the structure in front.
+
+Finally the ``NAME=string'' keyword allows you to define a named
+structure but I've never run into a case were I wanted to do that.
+
+
+As an example.
+
+\begin{IDLExample}\begin{verbatim}
+
+
+IDL>   a={afloat: 0.0, adouble: 0.0d, astring: ''}
+
+IDL> help,a,/st
+** Structure <8260c0c>, 3 tags, length=24, data length=24, refs=1:
+   AFLOAT          FLOAT           0.00000
+   ADOUBLE         DOUBLE           0.0000000
+   ASTRING         STRING    ''
+
+IDL>   a=create_struct(a,'along',0L,'acomplex',complex(0,0))
+
+IDL> help,a,/st
+** Structure <8260d6c>, 5 tags, length=36, data length=36, refs=1:
+   AFLOAT          FLOAT           0.00000
+   ADOUBLE         DOUBLE           0.0000000
+   ASTRING         STRING    ''
+   ALONG           LONG                 0
+   ACOMPLEX        COMPLEX   (      0.00000,      0.00000)
+
+IDL>   a=create_struct('aint',0,a)
+
+IDL> help,a,/st
+** Structure <8260774>, 6 tags, length=40, data length=38, refs=1:
+   AINT            INT              0
+   AFLOAT          FLOAT           0.00000
+   ADOUBLE         DOUBLE           0.0000000
+   ASTRING         STRING    ''
+   ALONG           LONG                 0
+   ACOMPLEX        COMPLEX   (      0.00000,      0.00000)
+
+\end{verbatim}\end{IDLExample}
+    
+    Notice that in the first call I added to the end of the structure,
+    in the second I added to the beginning.
+
+Mostly I use the first form of this function. I've found no need of
+the second and I can't think of a circumstance which required it.
+
+
+
+  \item Using execute() 
+    
+    the IDL builtin execute() is like ``eval'' in the shell, it allows
+    you to construct a string of a valid IDL executable line and then
+    execute it. This can be used to access or set fields of a
+    structure if you know at run time that a particular tag is in a
+    structure but you don't know that at compile time.  It's easy
+    enough to do. Say that you find out at run time that the structure
+    in ``a\_structured\_variable'' has the field ``the\_data'' in it,
+    and you want to pull it out.  You can do this.
+
+\begin{IDLExample}\begin{verbatim}
+    string=''data=a_structured_variable.the_data''
+    s=execute(string)
+    if s eq 0 then signal_an_error
+    ...
+    do stuff here
+    ...
+
+\end{verbatim}\end{IDLExample}
+
+Frankly, I almost never do this, I just use the ``tag\_names'' method
+discussed above.
+
+
+  \ee
+
+\subsection{Reference}
+This is just review. I've already covered most of what's needed to use
+structured variables, this is just a ``reference.''
+
+\subsubsection{Defining}
+
+\bi
+  \item Explicitly
+
+\begin{IDLExample}\begin{verbatim}
+   variable = { name1 : val1, $
+                 name2 : val2, $
+                  ... 
+                 nameN : valN } 
+
+\end{verbatim}\end{IDLExample}
+    
+    ``nameN'' must be a valid IDL variable name (comprising only
+    letters, numbers and underscores, beginning with a
+    letter.\footnote{and \$-signs, if you absolutely must} Case
+    matters not)
+
+
+
+  \item Automatically (named structures only)
+
+  \IDL{afoo=\{foo\}}
+
+  where, the structure named ``foo'' has been defined explicitly, as in 
+
+  \IDL{junk=\{foo, name1: val1$[$, \ldots $]$}
+  
+  or has been defined by putting that definition in a procedure named
+  foo\_\_define which is stored in a file of the same name located
+  someplace in your \$IDL\_PATH.
+
+\ei
+
+\subsubsection{Accessing}
+
+Fields are accessed by dot separated lists of tags starting with the
+variable name of the structured variable and ending in the field of
+interest, traversing all intervening structures. 
+
+Slices of any intervening arrays or arrays of structures result in a
+final array whose dimensions, from left to right of the resulting
+array, run from the inner most element to the outer most.
+
+
+An Example.
+
+\begin{IDLExample}\begin{verbatim}
+  
+
+  IDL> bot={afloat:fltarr(10)}
+  IDL> mid=replicate(bot,100)
+  IDL> top=replicate({mid:mid},1000)
+
+  IDL> help,top
+  TOP             STRUCT    = -> <Anonymous> Array[1000]
+
+  IDL> help,top,/st
+  ** Structure <8260c0c>, 1 tags, length=4000, data length=4000, refs=1:
+     MID             STRUCT    -> <Anonymous> Array[100]
+
+  IDL> help,top.mid
+  <Expression>    STRUCT    = -> <Anonymous> Array[100, 1000]
+
+  IDL> help,top.mid,/st
+  ** Structure <8261044>, 1 tags, length=40, data length=40, refs=4:
+     AFLOAT          FLOAT     Array[10]
+
+  IDL> help,top.mid.afloat
+  <Expression>    FLOAT     = Array[10, 100, 1000]
+
+  IDL> help,top[0:998].mid[0:97].afloat[0:7]
+  <Expression>    FLOAT     = Array[8, 98, 999]
+
+  IDL> the_data=top.mid.afloat
+
+  IDL> help,the_data
+  THE_DATA        FLOAT     = Array[10, 100, 1000]
+
+  IDL> help,the_data[0:7,0:97,0:998]
+  <Expression>    FLOAT     = Array[8, 98, 999]
+  IDL> 
+
+\end{verbatim}\end{IDLExample}
+
+
+\subsubsection{Gotchas}

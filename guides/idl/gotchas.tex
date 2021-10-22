@@ -1,0 +1,63 @@
+\section{Gotchas}\label{sec:Gotchas}
+
+  \begin{description}
+    \item \textit{Scalar versus 1-element vector}
+
+     There are circumstances where there's no difference between a
+     scalar and a one element vector or array.  The usual case is
+     addressing a scalar as an array. For instance, say you have a
+     scalar string:
+
+     \IDL{foo= ``bar''}
+  
+     If is perfectly permissable to say:
+
+     \IDL{foo[0] = ``baz''}
+
+     in order to change the value of that scalar string.
+
+     By analogy, you may any number (up to 8) of ``fictious'' trailing
+     dimensions, provided you only index their first (i.e. ``0-th'').
+     element!   I could just as easily have done
+
+     \IDL{foo[0,0,0,0,0,0,0,0] = ``baz''} 
+
+     It would have had the same result. IDL quietly ignores the fact
+     that ``foo'' is a scalar when the address is to a scalar, the
+     first of any such fictious array. Put a number different from
+     zero in any of those slots and you'll get a syntax error!
+
+     However, this situation is not symetrical in all
+     circumstances. For instance, if I do the following:
+
+     \IDL{foo = [``bar'']}\\
+     \IDL{IF strlen(foo) gt 1 THEN print, ``Bigger than 1!''}
+
+     I'll get a syntax error complaining:
+
+
+\begin{alltt}
+% Expression must be a scalar 
+%   in this context: <BYTE Array[1]>.
+% Execution halted at:  $MAIN$                 
+\end{alltt}
+
+    Solution:
+
+    In tests (e.g. IF/THEN DO/WHILE \ldots) , always index the
+    putative scalar. If the item is a singleton array masquerading as
+    a scalar you'll protect yourself against these sorts of errors.
+
+    In functions which return arrays, always test for singleton arrays
+    just before the return and ``scalarize'' the singleton array,
+    comme ca:
+
+\begin{alltt}
+if n_elements(foo) eq 1 then foo=foo[0]
+return,foo
+\end{alltt}
+
+    \item \textit{Anonymous structures not being ``anonymous''
+    enough.}
+
+\end{description}

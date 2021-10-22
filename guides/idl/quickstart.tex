@@ -1,0 +1,5035 @@
+%\chapter{Quick Start}
+
+\section{Some Basic Facts about IDL}
+
+  IDL is a weakly-typed vector based interpreter bearing a faint
+  resemblance to Matlab\footnote{although IDL predates it} which creates
+  and promotes variables as needed. The type of a result is the type of
+  the highest precision variable type occuring in the expression,
+  subject to operator precedence, and the dimensionality is a function
+  of the dimensions of the variables and expressions occuring in the
+  statement.
+
+  The consequence of IDL's weak typing is that you must pay a bit more
+  attention to the type of the variables occuring in expressions,
+  since even predefining variables doesn't necessarily assure the type
+  of the result. In fact, in consequence of this and the dynamic
+  nature of IDL's operation you needn't predefine variables, in most
+  cases. They are created as needed.
+
+  There are exceptions, of course, this is just a ``rule of thumb.''
+
+  Because it is an interpreter, it is slower than a compiled language,
+  such as C. In certain operations, looping in particular, it's
+  \textbf{significantly} slower. The lesson to learn is: don't
+  loop. Thankfully in most calculations there is little need of
+  this. A bit of care in how one writes code will pay significant
+  performance dividends, with the end result being nearly as fast as
+  Fortran or C.
+
+  Since IDL is vector based, many of the sort of looping constructs
+  one would see in compiled languages are \textbf{built in} to the
+  interpreter. For example, adding a scalar to every element of a
+  vector or array is a one line statement, the ``loop'' that actually
+  performs each addition is in the interpreter; there's no need for
+  you to write it yourself. The fact that there is an implicit loop
+  built in to the interpreter, when combined with several
+  \textit{built in} IDL functions make certain standard looping
+  constructs one sees in compiled languages, e.g. creating arrays
+  filled with indices, latitudes or longitudes,  one line statements
+  which are only slightly slower (if slower at all) than their
+  counterparts in compiled languages.
+
+  This are the basic points of the language, now to the specifics.
+
+\section{Creating Variables}\label{sec:qs-creating-variables}
+\index{Variables!Creating}
+
+    Creating constants and arrays.
+   
+    A quick table to show you how to create a constant of the
+    specified type. The table gives how to create an array constant as
+    well as a function to create an array of \prit{N} or \prit{N,M} or
+    \prit{N,M, \ldots, T} (i.e. up to 8 dimensions) (unspecified)
+    elements.
+
+  
+    \begin{center}
+%     \begin{table}
+     \begin{tabular}{||c|c|c||}\hline\hline\label{tab:variables}
+        Type & Constant & Array\\\hline\hline
+        Byte    & A=0b/A=byte() & a=[0b,1b, \ldots , nb]/A=bytarr(N)\\
+        Integer & A=0/A=fix() & A=[0,1,2 \ldots , N]/A=Intarr(N)\\
+        Long    & A=0L/A=long() & A=[0L, 1, 2, \ldots, N]/A=lonar(N)  \\
+        Float   & A=0./A=float() & a=[0.,1,2, \ldots, N]/A=fltarr(N) \\
+        Double  & A=0.d/A=double() & A=[0.d, 1, 2, \ldots, N]/A=dblarr(N)\\
+        Complex & A=complex(0,0) & A=cmplxarr(N) \\
+        String  & A=''string''/A=string() & A=[``s'',''t'']/A=strarr(N)\\
+        unsigned long   & A=0ul/A=ulong() & A=[0UL,1,2, \ldots, N]/A=Ulonarr(N)\\
+        64 bit long & A=0LL/A=long64() & A=[0LL,1,2, \ldots, N]/A=lon64arr(N)\\
+        Unsigned 64 bit long & A=0ull/A=ulong64() & A=[0ull,1, \ldots, N]/A=ulon64arr(N)\\\hline\hline 
+                  & Non Numeric types  &\\\hline\hline
+        structure & a=\{ a:0, b:0., c:strarr(10) \} & a=replicate(\{ \ldots \}, N [,\ldots, M]) \\
+        pointer & a=ptr\_new(\ldots) & a=ptrarr(N)\\
+        object & object=obj\_new(\ldots) & a=obj\_arr(N)\\\hline
+    \end{tabular}
+%   \end{table}
+    \end{center}     
+
+    \index{Useful Routines!Array!Bytarr}
+    \index{Useful Routines!Array!Intarr}
+    \index{Useful Routines!Array!Lonarr}
+    \index{Useful Routines!Array!Fltarr}
+    \index{Useful Routines!Array!Dblarr}
+    \index{Useful Routines!Array!Strarr}
+    \index{Useful Routines!Array!Replicate}
+
+
+
+    \index{Useful Routines!Variable Creators!Byte}
+    \index{Useful Routines!Variable Creators!Fix}
+    \index{Useful Routines!Variable Creators!Long}
+    \index{Useful Routines!Variable Creators!Ulong}
+    \index{Useful Routines!Variable Creators!Float}
+    \index{Useful Routines!Variable Creators!Double}
+    \index{Useful Routines!Variable Creators!Complex}
+    \index{Useful Routines!Variable Creators!String}
+
+
+    \index{Useful Routines!Type Casting!Byte}
+    \index{Useful Routines!Type Casting!Fix}
+    \index{Useful Routines!Type Casting!Long}
+    \index{Useful Routines!Type Casting!Ulong}
+    \index{Useful Routines!Type Casting!Float}
+    \index{Useful Routines!Type Casting!Double}
+    \index{Useful Routines!Type Casting!Complex}
+    \index{Useful Routines!Type Casting!String}
+
+
+
+  So, to create a single byte, one would execute
+
+  \IDL{A=0b}
+
+  To create a 'N' element byte vector (where 'N' is some number), do
+
+  \IDL{A=bytarr(N)}
+
+  To create a single short integer, do
+
+  \IDL{A=0}
+
+  Here there's no need for a suffix to tell the interpreter what type
+  to create, short-ints are the default type, unless you've added the
+  pragma ``compile_opt idl32'' to your program, in which case the
+  default integer is a 4-byte longword.
+
+  Similarly for the other types, use ``L'' for longwords (4-byte
+  integers), ``UL'' for unsigned longwords. Use a floating point number
+  to create, well, a float. A 'd' for a double
+
+  
+  In the calls to the array creation routines I've only put one
+  argument, but you can create arrays up to 8 dimensions, just add
+  more arguments in a comma separated list. Say you want to create a
+  float array that's 2 by 3. Then do:
+
+  \IDL{A=fltarr(2,3)}
+
+  
+  On may also create arrays with multiple dimensions explicitly,
+  instead of using a function. Just surround each dimension in it's
+  own set of square brackets, ``[ and ``\].''  Like this:
+
+  \IDL{A = [ [0,1],[4,5],[7,8] ] }
+
+  which is a 2 by 3 array. Or
+
+  \IDL{A=[ [ [0,1],[2,3],[4,5] ], [ [6,7],[8,9],[10,11] ] ]}
+	      
+  which is 2 by 3 by 2.
+
+  Oh, I just realized you probably don't know the order of the
+  indices!\index{Arrays!order of indices}
+
+  In IDL, the indices are go from left to right, like Fortran, unlike
+  C. So the left most index is the ``first,'' the next is the
+  ``second,'' and so on until the rightmost index. That is the memory
+  order too. If an array is 2 by 3 and each element is filled with its
+  index, then the memory order listing of this array would be 1, 2, 3,
+  4, 5, 6, i.e.
+
+  A[0,0] = 1\\
+  A[1,0] = 2\\
+  A[0,1] = 3\\
+  A[1,1] = 4\\
+  A[0,2] = 5\\
+  A[1,2] = 6\\
+
+  One may mix operations: calls to functions; explicitly created arrays,
+  however you wish to do it. The result of these operations has the type
+  of the highest precision encountered by the interpreter as it parses
+  the line from left to right subject to rules of precedence.  Higher
+  precedence operators are executed first and operators of equal
+  precedence in left to right order.(See Sec ~\ref{qs-evaluation-order}
+    for more discussion)
+
+  In fact, the \prbf{primary} way variables are created in IDL is by
+  assignment. And we just now did it twice in the examples above and
+  you nary batted an eye, right? See, it's getting easier already.
+
+  Remember, IDL is a dynamic language, variables are created on the
+  fly. If no variable named ``A'' had existed before you issued the
+  command:
+
+    \IDL{A=findgen(100)}
+    \index{Variables!Creating!Index Generators}
+    \index{Useful Routines!Index Generators!Findgen}
+
+  Then one would after, and it would look like:
+
+     A = [0.0,1.0,2.0, \ldots , 99.0 ]
+
+  Executing 
+
+    \IDL{A = bindgen(512) }
+    \index{Useful Routines!Index Generators!Bindgen}
+  would create an array which looked like
+
+     A = [0b,1,2, \ldots, 255, 0, 1, \ldots, 255]
+
+  (Get it? The array is filled with \prbf{bytes}, so it only goes up
+  to 255, then in wraps mod 256!)
+
+  With the ``A'' we created above, executing the command 
+
+     \IDL{B = A*2.0}
+
+  would create a new variable, ``B'', whose contents would be twice the
+  corresponding element of A.  There is no need to predefine B, B is
+  created by the assignment operation.  In fact, it's a waste of time to
+  predefined B if you're going to ``fill it'' as was done in the
+  statement above, because the B you predefined is destroyed in the
+  statement above and a new one is created in its place.\footnote{This isn't true
+  if you actually index into the predefined B, but there you may have
+  some type conversion issues: loading floats into a byte array may
+  cause a loss of precissiion.} Moreover, it would be a \prbf{float}
+  array where ``A'' was a \prbf{byte} array (because of the ``2.0'' in
+  the statement, which causes a promotion to float) 
+
+  But you could just do away with the explicit creation of ``A''
+  entirely and do:
+
+     \IDL{B=bindgen(512)*2L}
+
+  This would do the same as the line above, except now the result
+  would be a longword\footnote{32 bit integer} instead of a float and
+  there would be no presistent array named ``A.''
+
+  These few examples show another of IDL's implicit rules:
+  promotion. As mentioned above, IDL promotes the result of any
+  operation to the highest precision it encounters while reading the
+  line from left to right, subject to rules of operator precedence to
+  be discussed below. One indicates the precision of a variable by
+  providing the appropriate suffix or casting it using the appropriate
+  conversion function. In the former case: ``B'' for byte, ``L'' for
+  Long (no need for a suffix for 2 byte integer, this is the default
+  precision) and either a ``.''  or one of the well known engineering
+  notations to indicate a float, e.g. 2.0 or 2.3e-10 for floats and
+  2.3d-10 for a double. The type conversion functions are listed in
+  the table above.
+
+
+  Complex numbers, however, must be created through the use of a
+  function. They are the only numbers in IDL that can't be created
+  explicitly.\index{Variables!Creating!Complex!Exception to usual rules}
+
+\subsubsection{Evaluation order}\label{qs-evaluation-order}
+  The order in which the interpreter performs the actions can have
+  some consequences, since it does perform the operations in
+  steps. 
+
+  You can observe this behavior by executing:
+
+  \IDL{print, 1.0 +3/2}\index{Evaluation Order!example}
+
+  A naive reading of my paragraph above suggests that this should be the
+  float ''2.5,'' but alas it equals 2. Why? Because, like all computer
+  languages, division has a higher precedence than addition, so the
+  interpreter has already preformed the integer division, which equals
+  ``1,'' before it discovers the need for a promotion to float. This may
+  be what you want, but it might not be. You just have to be aware of
+  how the operations work.\footnote{But then this is true of every
+  computer language.}
+
+  If we wanted the answer to be 2.5, we should've executed 
+
+  \IDL{print, 1 + 3/2.}
+
+  or some similar modification.
+
+  In this case, IDL would have promoted the integer ``3'' to a float,
+  performed the floating point division 3./2., resulting in 1.5 and then
+  added that to the 1. (which it promoted from an integer because of the
+  result of the division has a higher precision than integer.
+
+  As I mentioned above, you can create arrays having up to 8
+  dimensions by either writing the array out
+  explicitly\footnote{painful for all but the most trivial array} or
+  by passing extra arguments in the array creation/index creation
+  routines.
+
+  Since I'm a believer in examples, I'll give some more.
+
+            \IDL{A=indgen(2,3)}
+  
+  creates a 2 by 3 array, which looks like:
+
+        \[ A = \left[ \begin{array}{ccc}
+            0 & 1\\
+            2 & 3\\
+            4 & 5\\
+        \end{array} \right] \]
+
+  This shows another class of very useful routines in IDL, the
+  ``index'' generators.\index{Useful Routines!Index Generators} These function return an array of the
+  specified dimensions where A[i] = i for i between 0 and the number
+  of elements of A - 1. 
+
+  A quick aside: 
+  
+  This example illustrates another important aspect of IDL, the
+  interpreter is quite happy to think of the most complicated array as
+  a vector\footnote{very much like C, but with more than 2 native
+  dimensions} which starts at the first element, runs contiguously
+  along it until the end, then increments the second dimension by 1,
+  and runs along the the first again until the end, repeating this
+  process until it's exhausted the dimensionality of the second index
+  and so it starts in on the third \ldots and the fourth \ldots and so
+  on until it gets through the whole array. This is the ``memory
+  order'' of the array, the first (left most) index varies the
+  fastest, followed by the second and on down the line to the last,
+  which varies the slowest. I'll have occasion to speak of this later,
+  but I wanted to put the thought inside your head: there is nothing
+  implicitly magical about multi-dimensioned arrays. They're just big
+  long vectors whose elements you access with a special lingo, but you
+  don't have to if you don't want to, you can access them as a single
+  long vector or you can reform them so that the dimensions have
+  different shapes\footnote{provided you keep the total number of
+  elements the same}.  In this endeavor, these index generators can be
+  quite helpful.
+
+  Okay, I'm back.
+
+  These functions replace all that C or Fortan code that maps any
+  monotonically increasing abscissa to an ordinate via some
+  function. 
+
+  For instance, in order to create a unit amplitude, unit period sine
+  wave with 100 elements in C, one would write something like:
+
+\begin{verbatim}
+  int i;
+  float s[100];
+  for (i=0;i<100;i++)
+       s[i] = sin((i/99.0)*3.14159);
+\end{verbatim}
+
+
+But in IDL, one would write:
+
+
+    \IDL{A = sin(findgen(100)/99*!pi)}\footnote{!pi is a system
+  variable, equal to 3.14159\ldots, i.e. to $\pi$}
+
+Some more examples: 
+
+  
+    \IDL{A = findgen(360)\#replicate(1.,180)}
+
+  A is a 360 by 180 array, useful for representing longitudes
+  on a 1 by 1 degree grid. ``Replicate'' creates an array of
+  specified dimension(s) filled with the number appearing as
+  the first parameter. In this case, a 180 element vector
+  filled with ``1.0''.
+
+  The ``\#'' is one of the two IDL matrix multipliers, the other being
+  ``\#\#'', of which I will have more to say later.\footnote{And boy,
+  won't you be confused then! I know I always am.}
+
+    \IDL{B = replicate(1.,360)\#(findgen(180)-90)}
+
+  B is the array of latitudes which go with ``A''
+
+  Note that ``replicate'' and ``findgen'' have been switched. You'd
+  suspect that whichever way the longitudes in ``A'' ran, the
+  latitudes in ``B'' would run the other way, and you'd be right. In
+  fact, the longitudes in A run along the rows of the array and the
+  latitudes in B run along the columns and this is the natural
+  arrangement one would use to create a grid that \prit{did the right
+  thing} when you printed or plotted it.
+          
+\subsection{Variable names}\label{sec:qs-Naming-Conventions}
+
+  Variables may be any length with characters taken from the
+  characterset [a-z0-9\_] but must start with a letter. They are case
+  insensitive: ``foo'' == ``Foo'' == ``FoO'' == ``FOO,'' so if you do
+
+  \IDL{foo=1}
+
+  and then
+
+  \IDL{FOO=2}
+
+  You've just reset the original value of ``foo'' to ``2.''
+
+
+\subsection{Finding out about your IDL session}
+\label{sec:qs-variables-help}
+\index{variables!getting help on}
+
+You can get help about your current IDL section by issuing the 
+
+\IDL{help} 
+
+  command. If you issue it just as given above, this command will report
+  a great deal of information. Depending on what you've been doing, it
+  could run to many pages. 
+
+  You can more precisely specify what information you want by using
+  one of the many keywords that allow you to gather information about
+  variables, routines, structures, files and all manner of other
+  things.
+
+  For instance:
+
+
+  \IDL{help,/functions}\index{help!functions}
+
+  will tell you what functions are defined in your current session.
+
+  \IDL{help,/device} \index{help!plotting device}
+
+   will tell you about your current graphics device.
+
+  \IDL{help,/files}\index{help!open files}
+
+   will tell you what files are currently open.
+
+   \IDL{help,/breakpoints}\index{help!breakpoints}\index{debugging}
+
+   will tell you what breakpoints you have set using the builtin
+   routne \textit{breakpoint}.
+
+
+
+  If you know the name of the variable you want to investigate, you
+  merely say:
+
+  \IDL{help,variablename}\index{help!variable type/content}
+
+  If that variable were a structure, you could say:
+
+  \IDL{help,variablename,/structure}\footnote{structutes as in the
+  case of C or Fortran structures. More on this later}\index{help!variables!structures}
+
+   and IDL would tell you the shape of the structure and its name, if
+   it isn't an anonymous structure.
+  
+
+\section{Operators}\label{sec:qs-operators}
+
+\subsection{Arithmetical Operators}
+\label{sec:qs-arithmetical-operators}
+\index{Operators!arithmetical}
+
+  The standard set of arithmetical operators (+, -, /, *, \IEXP\ for
+  exponentiation and \# and \#\# for matrix multiplication) are
+  supported, using the standard rules of precedence,
+  i.e. exponetiation highest, multiplication/division before
+  addition/subtraction and equal precedence goes left to right with
+  parentheses overriding these precedence rules.
+
+  In addition to these, IDL added, as of version 6.0 (I think?), the
+  inrement/decrement operators ++ and \-- as well as the compound
+  assignment operators +=, -=, *= and /=. Users of C and other such
+  languages will recognize these immediately. For those coming from
+  Fortran, the $<$ op$>$ = operators is shorthand for var = var $<$ op
+  $>$ operand, as in.
+
+  \IDL{A += 1} 
+
+  is exactly equivalent to
+
+  \IDL{A = A + 1}
+
+  Simile for the other operators.
+
+  The increment/decrement operators demand a little comment, for those
+  unfamiliar with them. The theory is you can tell the interpreter to
+  \prbf{use} a variable and \prbf{increment} (or \prbf{decrement}) that
+  variable in the same statement. Say you have an element of an array
+  you're using as a counter, and when it reaches 0 you want to do
+  something. You could write something like:
+
+  \begin{alltt}
+  a[jj]=10
+  \textbf{WHILE a[jj] GT 0 DO BEGIN}
+    \textit{do something}
+    a[jj] = a[jj]-1
+  \textbf{ENDWHILE}
+  \end{alltt}
+
+  You could even shorten it using the ``compound assignment'' statement.
+
+  \begin{alltt}
+  a[jj]=10
+  \textbf{WHILE a[jj] GT 0 DO BEGIN}
+    \textit{do something}
+    a[jj]-=1
+  \textbf{ENDWHILE}
+  \end{alltt}
+
+  But the decrement operators allow you to write 
+
+  \begin{alltt}
+  a[jj]=10
+  \textbf{WHILE a[jj]-- GT 0 DO BEGIN}
+    \textit{do something}
+  \textbf{ENDWHILE}
+  \end{alltt}
+
+  or 
+
+  \begin{alltt}
+  a[jj]=10
+  \textbf{WHILE --a[jj] GT 0 DO BEGIN}
+    \textit{do something}
+  \textbf{ENDWHILE}
+  \end{alltt}
+
+  The difference between the two is this: in the former jj is
+  decremented \prbf{after} you use it, which in the latter it's
+  decremented \prbf{before} you use it! In this case, I believe
+  (without testing!) that in the first case a[jj] equals 10 and it's
+  decremented after the test, in the second a[jj] is decremented
+  before and the test is made with a[jj] eq 9.
+
+  If you find this confusing, good! It is. Moreover, it's a bit
+  dangerous, particularly if you include these operators in statements
+  having multiple occurances of the variable using the operator,
+  e.g. A[i] = i++. The question is, what value does IDL use as the
+  index to A? You get two different annswers depending on which part
+  is evaluated first. The RSI documentation explicitly says that it
+  will impose no specific requirement, that different implementations
+  may evaluate in different orders. Which means that if you're trying
+  to write code to be run on different machines, you're well advised
+  not to use such constructs.
+
+  I'd go one step further and say you probably shouldn't use them at
+  all, the ``compound assignment'' statements should be sufficient to
+  every need, but it's up to you.
+
+
+  You can do operations between arrays and scalars or arrays and
+  arrays, so long as the dimensionalities of the two items make
+  sense. IDL will truncate certain operands in certain circumstances,
+  so you should be aware of this. Basically, unless you're doing
+  something pretty strange the operations will work out as expected:
+  adding a scalar to an array results in that scalar being added to
+  each element of the array. Same with the ``-,/,* and \^''
+  operators. The ``compound assignment'' and increment/decrement
+  operators work as expected too: A +=1 adds one to each element of A,
+  as does A++.
+
+  \subsection{Basic operations between arrays}\label{ref-array-basic-ops}
+
+  The matrix multiplication operators are a little more complicated.
+  Just as in linear algebra, they require the arrays to be the correct
+  shape, but they are further complicated by the fact that arrays are,
+  in a linear algebra sense, backward and so the \# operator works
+  backward.  I won't go over them here since this is a ``quickstart''
+  guide. Read up on them in the online help if you really need to do
+  matrix multiplications.
+
+  When the operands are two arrays with the same shape, the
+  operations occur element-wise. So:
+
+  \IDL{ print,[2,3,4]*[4,5,6] = [8,15,24]}
+
+  Things can get a bit more convoluted if the two operands are two
+  arrays with different dimensions.\footnote{But you \prbf{can} do
+  some operations with arrays of quite different shapes, try
+  \IDL{A=findgen(2,3,4) \& B=findgen(3,2) \& C=A*B \& help,a,b,c} and
+  see what happens} Generally you're not going to want to do this, so
+  I'm not going to go into the details too deeply, but sometimes it
+  can be helpful to operate on arrays of different sizes as a short
+  hand way of doing something.
+
+  I'll give you one example. A not infrequent task is taking the
+  running difference of an array with itself. By this I mean to form
+  the differance array whose i-th element is the difference between
+  A[i+1] and A[i]. 
+
+  The long hand way of doing this would be:
+
+  \IDL{N=n\_elements(A)}
+
+  \IDL{diff = A[1:n-1]-A[0:n-2]}\footnote{Actually, the \prbf{really}
+  long way is: \prit{b=a \& for i=0,n\_elements(a)-2 do b[i]=a[i+1]-a[i] }}
+
+  But you can get the same result, much more rapidly, with:
+
+  \IDL{diff = A[1:*]-A}
+
+  This example illustrates another short-cut aspect of IDL, using the
+  shape of the arrays in the operation to define the shape of the
+  output. The first operarand is a temporary array consisting of A,
+  starting with element 1 and running to the end of A. The second is
+  just A, staring at element 0 and going through the whole array.  When
+  the interpreter takes this difference, it only does so until it runs
+  out of elements in one or the other of the arrays. In this case, the
+  first array is 1 element smaller than the second and so it stops when
+  it reaches the end of the first. 
+
+  Which is  is precisely what is desired.
+
+  The best way to get a handle on these rules is just to play around
+  and construct different tests. Here's one for you to ponder.
+
+  \IDL{A=[[2,3,4],[4,5,6],[7,8,9]]}\\
+  \IDL{B=[[2,3,4],[0,1,0]]}
+
+  So A is 3 by 3 and B is a 3 by 2. Let's raise A to the power of
+  B. What will happen?
+  
+  \IDL{print, a\IEXP b }
+
+   yeilds:
+
+     \[ \left[ \begin{array}{ccc}
+       4  &    27  &   256\\
+       1  &     5  &     1\\
+     \end{array} \right] \]
+
+
+
+    So the interpreter just ignored the extra row in A.
+
+\subsection{Booleans, Bitwise and Relational Operators}
+\label{sec:qs-Boolean-Bitwise-Relational-Ops}
+\index{Operators!bitwise}\index{Operators!relational}
+
+  IDL's boolean/bitwise and relations operators act on scalars or
+  arrays, just like the arihtmetical operators.  
+
+  \subsection{Boolean/bitwise operators}\label{qs-boolean-bitwise-ops}
+  I call the ``AND'',
+  ``OR'', \ldots, species of operators ``boolean/bitwise'' because they
+  do a bit of both. But to be completely rigorous, they're \prbf{bitwise}
+  operators. They take the two operands and return the relevant bitwise
+  combination. the fact that such a combination has meaning in the sense
+  of ``truth/falsity'' is how they come to have a ``boolean'' sense.
+
+  So, for instance, if you use the Boolean/Bitwise operator ``AND'' on
+  an array and set the result equal to the variable ``B'', comme ca:
+
+  \IDL{B = A AND 1} 
+
+  then B will have the same shape as ``A'', it will have whichever type
+  between the type of ``A'' and ``short integer'' has the higher
+  precision and it equal 1 wherever A has bit zero set and zero
+  otherwise.
+
+  Example:
+
+  \IDL{print,indgen(10) AND 1} ; prints\index{indgen}
+
+
+  \IDLOUT{0       1       0       1       0       1       0       1       0}
+
+
+  \subsection{Relational operators}\label{qs-relational-ops}
+  \index{Operators!relational}
+
+  Similarly, relational (e.g. ``GE'',''LE'',\ldots) operators create an
+  array with a ``1'' where the relation holds and a ``0'' where it
+  doesn't. So:
+
+  \IDL{print,indgen(10) LE 5}; prints
+
+  \IDLOUT{1   1   1   1   1   1   0   0   0   0}
+  
+  The Booleans/bitwise operators  are
+
+  AND, OR, NOT ,XOR
+
+  The Relational operators are
+
+  LT, LE, EQ, GE, GT, NE
+
+  this means you can do things like the following. Say you want to
+  create an array which has the same shape as some data array ``A'' , but
+  which has zeros wherever A is less-than some number ``N''. Then you
+  do this.
+
+  \IDL{A = A*(A ge N)}
+
+  The ``A ge N'' creates an array which has ``1'' wherever A is GE N
+  and zero otherwise. Multiplying ``A'' by this array zero's out all
+  the entries which are LT N.
+
+
+  Oh, and you can do these operations ``array on array,'' provided the
+  dimensions make sense.
+
+  So you could have the ``N'' above be an array of numbers instead of
+  a simple scalar and, provided the dimensionality of A and N made
+  sense, the comparison would be element to element. Same with using
+  the Boolean operators, you can \prit{AND} two arrays together and the
+  result will be the \prit{AND} of the two arrays, element by element.
+
+  As is the case with the arithmetical operators above, so to in the
+  case of these bitwise/relational operators, RSI recently added
+  compound operators for each of these. They act in the same way, i.e.
+
+  \IDL{A \textbf{op=} B} 
+ 
+  is simply short hand for
+
+  \IDL{A = A \textbf{op} B}
+
+  \subsubsection{Truth/Falsity}\label{sec:qs-Truth}\index{Truth/Falsity}
+
+   IDL's ``True'' and ``False'' has different meanings depending on
+  the type of the operand(s). Most of the time this doesn't make that
+  much of a difference, but it can, so you should know about it.
+
+  The IDL help files claims the definition of ``True'' is:
+
+
+
+  \slshape
+   Definition of True and False
+
+
+  The condition of the IF statement can be any scalar expression. The
+  definition of true and false for the different data types is as
+  follows:
+
+  \bi
+
+   \item Byte, integer, and long: odd integers are true, even integers are false.
+
+
+   \item Floating-Point, double-precision floating-point, and complex:
+  non-zero values are true, zero values are false. The imaginary part
+  of complex numbers is ignored.
+
+
+   \item String: any string with a nonzero length is true, null strings are false.
+
+  \ei
+  \normalfont
+
+  Now, you can certainly use these operators in statements where one
+  normally wants a ``true'' or ``false'' answer, like conditionals and
+  other such tests. But in this case you can't have arrays as the
+  operands. 
+
+
+\subsection{Logical And/Or}\label{sec:qs-and-or}
+\index{Operators!Logical!\&\&!see {LogicalAnd}}
+\index{Operators!Logical!||!see {Logical Or}}
+
+In IDL version 6.0 (I believe), RSI introduced ``short-circuiting''
+logical operators: \&\& (logical ``and'') and $||$  (logical ``or''). Such
+operators stop at the first evaluation where the result is known, so for
+``and'' that's at the first ``false'' and for ``or'', the first
+``true.''  The operators discussed above don't do that, even if the
+first operand of an ``and'' is false, they still perform the second
+test. 
+
+\newpage
+
+So, if one defined the following two functions
+
+\begin{alltt}
+ \textbf{FUNCTION zero }
+  \textit{print,'in zero'}
+  \textit{return,0}
+ \textbf{END}
+\end{alltt}
+
+\begin{alltt}
+ \textbf{FUNCTION one }
+  \textit{print,'in one'}
+  \textit{return,1}
+ \textbf{END}
+\end{alltt}
+
+  And then ran the following.
+
+  \IDL{IF (zero() and one()) then print,'yes' else print,'no'}
+   \index{Operators|Bitwise|AND}
+
+  You'd see the following output
+
+
+\begin{alltt}
+       in zero
+       in one
+       no
+\end{alltt}
+
+
+   But if one did
+
+  \IDL{IF (zero() \&\& one()) then print,'yes' else print,'no'}
+\index{Operators|Logical|And}
+
+  Then the output would be
+
+
+
+\begin{alltt}
+       in zero
+       no
+\end{alltt}
+
+  the difference comes about  because the short-circuit operator \&\&
+  knows the whole conditinal is false by the time the function
+  ``zero()'' returns, a conjunction is false if one of its conjuncts is
+  false, and so it doesn't have to go any further. That's why it's
+  called a ``short-circuit'' operator.
+
+The case for the short-circuit ``or'' is similar, just change 'AND/\&\&''
+to ``OR/$||$'' and reverse the calls and you'll see the difference. I
+leave that as an exercise.
+
+
+
+\subsection{Min/Max operator}\label{sec:qs-Min-Max}
+\index{Operators!Min/Max}
+\index{Operators!$<$!See {Min/Max}}
+\index{Operators!$>$!see {Min/Max}}
+
+    One may quickly chop off the top or bottom of an array, in the sense
+    of setting any elements to a min/max value, by using the
+    $<$, $>$ operators. The $<$ operator returns the lesser of its
+    two arguments and $>$ the greater. These work whether the
+    arguments are scalars or arrays, so you can set the bottom of an
+    array with
+
+    \IDL{A = A $>$ 2}
+
+    Which sets equal to ``2'' all elements of A which are ``less than
+    or equal to 2.''
+
+    Similarly can set the top with
+
+    \IDL{A = A $<$ 7} 
+
+    Set's to ``7'' all elements of A which are larger than ``7.'' 
+
+    And you can do both of these with:
+
+    \IDL{ A = 2 $>$ A $<$ 7}
+
+    Example:
+
+    \IDL{ print, 2 $>$ indgen(10) $<$ 7} ; prints
+
+    \IDLOUT{  2   2   2   3   4   5  6  7  7   7} 
+
+    Particularly useful in this regard, is taking means and standard
+    deviations which require protection against devision by zero. Say
+    you have taken the sum/sum-of-squares, prepatory to calculating
+    the mean/sigma, of some physical quantity in 1 by 1 degree grid
+    over the entire earth  and now you want to calculate the
+    mean/sigma. So you have three arrays, each 181 by 360: sum, sumsqr
+    and num. 
+
+    You could use the following \prbf{really, really slow} code:
+
+\begin{alltt}
+mean=(sigma=fltarr(181,360))
+for lat=0,180 do for lon=0,359 do begin 
+  if num[lat,lon] gt 0 then mean[lat,lon] = \$
+            sum[lat,lon]/num[lat,lon]
+  if num[lat,lon] gt 1 then \$
+    sigma[lat,lon] = \$
+	sqrt(sumsqr[lat,lon]-num[lat,lon]*\$
+             mean[lat,lon]^2)/(num[lat,lon]-1)
+endfor
+\end{alltt}
+
+  The first time you try this, you'll find out why you don't want to
+  do it this way. And God help you if you wanted to do 1/10 of a
+  degree grid!
+
+  The \prbf{fast} way uses the inherent looping capability built right
+    into the interpreter, along with the min/max operators. All you
+    have to do is:
+
+\begin{alltt}
+mean=sum/(num>1)
+sigma=sqrt( ((sumsqr-num*mean^2)/( (num-1)>1))>0)
+\end{alltt}
+
+  {\large \prbf{Done!} }
+
+  The first ``num$>$1'' protects the calculation of the mean from
+  division by zero, the ``(num-1)$>$1'' protects the calculation of
+  standard deviation from division by zero and the ``$>$0'' protects
+  from taking a square root of a negative number.
+
+  Another use for the min/max operator is plotting. If you want to
+  quickly look at the plot of some data that has some ``bad data value''
+  that's far outside the range of the data and you don't want to
+  actually change the data (or copy it and change the copy) by using
+  ``where''\index{Useful Routines!where} then just chop the
+  top/bottom/both off with these operators.
+
+
+\section{Arrays}\label{sec:qs-Arrays}\index{Arrays}
+
+  Arrarys are the life's blood of IDL. You will, in very short order,
+  do more monkeying about with arrays then you thought possible. 
+
+  The language supports arrays up to 8 dimensions. You address each
+  specific dimension by putting a comma separated list of numbers
+  between two square brackets, one number for each
+  dimension.\footnote{There is an older syntax using parantheses, but I
+  strongly suggest you don't use it because it may go away soon and
+  because it can sometimes confuse the interpreter, which occasionally
+  can't tell the difference between a function call and an array
+  reference} The dimensions are zero indexed so their indices run from 0
+  to the N-1 where N=number of elements in that dimension.
+
+  In addition to single number, you may put into any of these slots in
+  this comma separated list entries that call for a ``slice'' of the
+  array. Or you may include a vector, either by named variable or by
+  explicit reference. I say this now knowing that you probably don't
+  understand me, but you will shortly.
+
+  In an 2-d array, one calls the first dimension the column and the
+  second the row. So, for example, to print the first column of the
+  second row of such an array you'd do:
+
+  \IDL{print,A[0,1]}\index{Arrays!Indexing!Constants}
+
+
+  A ``*'' in any slot mean ``all the elements in that slot''
+
+  Using ``n:m'' is a ``slice:'' it means all entries from index N to
+  index M. It \prbf{does not} mean the ``N-th'' element to the
+  ``M-th'' element.\footnote{This would be off by one in each
+  dimension} In particlar, if ``m'' equals ``*'' the syntax means all
+  the elemnts from index N to the end.
+
+  You may construct a vector and us it in one of these slots. Say you
+  wanted only the even elements of the first dimension of a 3-D
+  array ``A''. Let N be the number of elements in that first dimension. The
+  following would do the trick:
+
+  \IDL{B = A[ findgen(n/2)*2, *, *] }
+
+
+  You can accesses slices and subarrays by cunning use of these
+  building blocks I've given above.
+
+  So, if you have the following 2-d array
+
+  \[ A = \left[ \begin{array}{cccc}
+        1 & 2 & 3   & 4 \\
+        5 & 6 & 7   & 8 \\
+        9 & 10 & 11 & 12 \\
+        \end{array} \right] \]
+
+  a 4 by 3 array, then
+
+  \IDL{print,A[0,*]} ;will print\index{Arrays!indexing!slices}
+
+   \[ \begin{array}{c}\\
+        1 \\
+        5 \\
+        9 \end{array} \]
+
+   \IDL{print,A[0:2,*]} ;prints
+
+  \[ \begin{array}{ccc}\\
+        1 & 2 & 3 \\
+        5 & 6 & 7   \\  
+        9 & 10 & 11 \\
+        \end{array} \]
+  
+
+  You can modify portions of the array in place by putting the
+  subarray expression on the left had side of the equals sign, the
+  only instance I know that allows for assigning to an expression. For
+  instance, to multiply a segment of this array by two, one could do:
+
+   \IDL{ A[2:*,1:2] = A[2:*,1:2]*2 \& print,A} ; which will print
+
+  \[ \begin{array}{cccc}\\
+        1 & 2 & 3   & 4 \\
+        5 & 6 & 14   & 16 \\
+        9 & 10 & 22 & 24 \\
+        \end{array} \]
+
+\subsubsection{Indexing with arrays}\index{Arrays!Indexing!With Arrays}
+
+  One of the great strengths of IDL, possibly its greatest, is the
+  ability to index one array with another. You will repeatedly do this
+  with vectors created by calls to the IDL builtin routine
+  \IDLBUILTIN{where}. \footnote{see Section~\ref{sec:qs-where} for a more information on
+  this indispensible function}\index{where} ``Where'' returns a
+  1-d longword vector containing the indices where the input array is
+  non-zero. 
+
+  Stop for a moment and absorb that statement, because it's important!
+  Usually, the ``input array'' is the result of some Boolean or Relational
+  operation.
+
+  For instance, say you have some data array that has some default
+  value in it indicating bad data and you want to get rid of this
+  bad data. You really don't care what shape the data array is in, a
+  vector is fine by you.
+
+  You'll do that with the following sort of operation\footnote{pay
+  attention, you'll be doing this sort of opertation again and again!}
+
+  \IDL{x=where(data ne baddata,nx)}\index{Useful Routines!where}
+   
+   \IDL{if nx ne 0 then data = data[x]}
+
+  And the bad data is gone. It's true, ``data'' is now a simple vector
+  so whatever shape it had before -- and it could have been an 8
+  dimensional array -- is now gone.
+
+  Here the ``input array'' is the result of the boolean operation
+  ``data ne baddata''. This temporary array, which IDL creates on the
+  fly, has a ``1'' wherever ``data'' is not equal to baddata and a
+  ``0'' where it is. So it's an array filled with ``1''s and ``0''s
+  and it's entirely appropriate to ask where this array is non-zero.
+
+
+  However, there's no reason why you can't index into the index. You
+  can repeat this process indefinitely\footnote{So far as I can tell,
+  though I think I've never gotten beyond 5 levels of indirection} Say
+  you want to find all the data in a particular range, which
+  represents ``bad'' data in some way, but you don't want to get rid
+  of it immediately, first you want to collect some statistics, say in
+  the north/south hemispheres. 
+
+
+You could do the following.
+
+\newpage
+
+\begin{alltt}\index{moment}
+  bad=where(data ge minrange and data le maxrange, nbad)
+  if nbad ne 0 then begin 
+    n = where(lat[bad] ge 0, nn)
+    if nn ne 0 then begin 
+      tmp = (moment(data[bad[n]]))[0,1]
+      nmean = tmp[0]
+      nstdev =sqrt(tmp[1])
+    endif 
+    s = where(lat[bad] lt 0,ns)  
+    if ns ne 0 then begin 
+      tmp = (moment(data[bad[s]]))[0,1]
+      smean  = tmp[0]
+      sstdev = sqrt(tmp[1])
+    endif 
+  endif 
+  good=where(data lt minrange or data gt maxrange,ngood)
+  if ngood ne 0 then begin 
+    data=data[good] 
+    lat=lat[good]
+  endif else begin 
+    Message,''No good data'',/cont
+    return
+  endif 
+
+  \ldots
+
+   Do something with the good data here.
+
+   \ldots
+
+\end{alltt}\index{Useful Routines!moment}\index{}
+
+  You may be wondering about that little thing up there with
+  (moment\ldots)[0,1], what's up with that? The ``moment'' function
+  returns the standard set of statistics on the input array (mean,
+  variance, skew, kurtosis and count, I believe). I only want the mean
+  and standard deviation. By surrounding the function call with
+  parentheses I signal the interpreter that I want to index into the
+  returned vector without having to assign it to a variable; the syntax
+  turns it into an anonymous vector. The [0,1] selects the first two
+  elements of that vector.
+
+  But you certainly can make the indices up yourself, you don't
+  \prbf{need} to use \IDLBUILTIN{where}\index{Useful
+  Routines!where}. Say you want to decimate your data by a factor of
+  two. Do the following:
+
+  \IDL{data = data[lindgen(n\_elements(data)/2)*2]}\footnote{Notice the use
+  of \prbf{lindgen} there. Why do you think I did that, hummmmm?}
+  \index{Useful Routines!Index Generators!Lindgen}
+
+  Eh \prit{viola!} Half the data is \prit{gone!}
+
+  You can also index each dimension seperately using seperate indexing
+  vectors, but this is getting too complicated for a ``quickstart''
+  chapter, so I'll leave it for you to play with.\footnote{everytime I
+  do this sort of thing  in my work, I have to figure out how it works
+  again, that's how much I use it.}
+
+\subsection{Degenerate Dimensions}\label{sec:qs-Degenerate-Dimensions}
+
+  IDL deletes trailing degenerate dimensions. By trailing I mean the
+  last index, the one farthest to the right in the list.
+
+   So if A is a 3 by 2 array and you do.
+
+  \IDL{B=A[*,0]}\index{Arrays!degenerate dimensions}
+
+  Then B is a 3 element \prbf{vector}! Not a 3 by 1 element array.
+
+  This only works on trailing dimensions, leading degenerate
+  dimensions are retained. I guess this is because some algebraic
+  operations (cross products) make sense for these arrays but I don't
+  know for sure. Nor do I really care, yet.
+
+  So, if instead of the above you did:
+
+  \IDL{B=A[0,*]} 
+
+  Then B would be a 1 by 2 array (column vector, actually) You can get
+  rid of this with a call to the IDL builtin \IDLBUILTIN{reform}, thusly:
+
+    \IDL{B=reform(A[0,*])}\index{Useful Routines!Array!reform}
+
+  Now IDL understands that you want the leading dimension squashed.
+
+  In fact, you can use ``reform'' to eliminate any degenerate dimension.
+
+  For IDL versions less than 6.0 (I believe) you do have to be careful
+  about creating and accessing 1 by \ldots arrays because you can commit
+  run time errors. For example, certain functions return a scalar as a
+  one element array. Using that one element array in a conditional will
+  cause a runtime error. I believe with 6.0 IDL now ignores such cases.
+
+  By the way, \prit{reform} is the general builtin for changing the
+  shape of an array when the total number of elements isn't going to
+  change. So, to turn a N by M array into a vector, do:
+  
+  \IDL{A = reform(B, n*m)}\index{Useful Routines!Array!reform}
+
+  If all you want to do is transpose the array, just call the IDL
+  builtin \IDLBUILTIN{transpose}, thusly:
+
+  \IDL{A = transpose(B)}\index{Useful Routines!Array!transpose}
+
+  With B an N by M array, A is a M by N array.
+
+  In fact, transpose() can be used to rearrange the dimensions in any
+  permutation. Say you have A, a 181 by 360 by 55 array (lats,lons,
+  pressure surfaces), and you wanted to rearrange it as
+  (lons,lats,press). You'd do this.
+
+  \IDL{A=transpose(A,[1,0,2])}
+
+  Which says ``exchange the first and second dimension, but leave the
+  last in place.''
+
+  If you want to change the number of elements, you can use either
+  \prit{rebin}, if the new dimensions are integral multiples or divisors
+  of the original ones, or \prit{congrid},
+  \prit{interpolate},\prit{interpol} or \prit{bilinear} if they aren't.
+  \index{Useful Routines!Array!rebin} \index{Useful
+  Routines!Array!congrid} \index{Useful Routines!Array!interpolate}
+  \index{Useful Routines!Array!interpolate} \index{Useful
+  Routines!Array!bilinear}
+
+
+
+\subsection{Phantom Dimensions}\label{Phantom-Dimensions}
+        \index{Arrays!phantom dimensions}
+
+  IDL will allow you to access any number of phantom trailing
+  dimensions, provided you only try to access the first element of
+  that dimension. This means you can access a scalar as if it were an
+  array of one element and it's frequently a good idea to do this,
+  particularly in the test clauses of If/then/else, do/while or
+  repeat/endrep constructs. Of you can take the case I gave above where
+  IDL deleted the trailing dimension and still access the, by now,
+  deleted dimension, with the restriction given above.
+
+  So, you can do:
+
+
+  \IDL{B=A[*,0]} 
+
+  \IDL{print,B[1,0]}
+
+  And IDL will quite accomodatingly print A[1,0] = B[1]
+
+
+
+\subsection{Column/Row Major}\label{sec:qs-Column-Row}
+  \index{Arrays!Column/Row Major controversy}
+
+  A word about Column/Row Major and the arrangement of arrays.
+
+   Forget about it! 99.99\% of the time only important issue is which
+  index varies first. In IDL it goes left to right (like Fortran). The
+  first index varies fastest, followed by the second, followed by the
+  third, \ldots , up to the eighth.
+
+   Now when you plot an array to the screen, say you're plotting an
+   image array, the question of which index is which becomes important
+   because we naturally think of a computer screen as being arranged
+   by row and column. In that circumstance all you need to know is
+   that the IDL array thinks of the first index as the column and the
+   second as the row and that this is the natural way to think of it
+   in an image processing context.
+
+   But when you go to do linear algebra, you'll find yourself
+   reversed, since almost everyone thinks of arrays as row, then
+   column. And the ``\#'' operator works backwards from the normal
+   linear algebra matrix multiplier, it multiplies the \prbf{rows} of the
+   first array against the \prbf{columns} of the second\footnote{although the
+   ``\#\#'' works as expected} so have a care with that one.
+
+   Knowing how the data is arranged in memory will solve \prbf{lots} of
+   problems for you since it allows you to read files in one slurp, go
+   back and forth between 1-d and N-d indexing operations, reduce the
+   memory footprint of operations through the judicious use of
+   \prit{transpose}\index{Useful Routines|Array|transpose} and
+   \prit{reform}\index{Useful Routines!Array!reform} and turn really
+   gnarley multiplications involving lots of loops into one line pieces
+   of elegance which will astound and amaze your co-workers.
+
+   So, start being aware of these matters \prbf{now}.
+
+\section{Programming}\label{sec:qs-Programming}
+
+  You can do a lot just typing commands at the IDL command line, but
+  eventually you're going to want to store frequently used sets of
+  commands into some file which you can call repeatedly.
+
+  This section discusses how to do this.
+
+\subsection{Types of routines}\label{sec:qs-Routine-Types}
+        
+    There are two types of routines: builtin and those defined by
+    source code in some file somewhere. RSI considers all files with
+    an extension of '.pro' to be instances of their source language
+    and if one attempts some operation requiring such a file but does
+    not explicitly mention an extension, an extension of ``.pro'' is
+    assumed. For simplicity sake I'll call all files containing the
+    IDL source language ``.pro'' files. 
+
+    Builtin routines are written in C or Fortran and compiled or
+    dynamically linked\footnote{see \IDLBUILTIN{linkimage} and
+    \IDLBUILTIN{call\_external} for discussion of how a user may
+    accomplish the same thing themselves} into the IDL
+    executable. They always look like procedures or functions,
+    concepts I haven't defined yet but which you probably know the
+    basics of from experience with other computer
+    languages.\footnote{Procedure: think fortran ``subroutine'',
+    Function: think any higher-level language ``function''}
+
+    .PRO files, since they are in a high-level ``source'' language,
+    must be ``interpreted'' by the interpreter before being
+    executed.\footnote{Actually, there's a ``compilation'' step where
+    the code is compiled to pseudo-code, but as this is a quickstart
+    guide, I'll skip this for the moment} The interpreter finds these
+    files by means information contained in the user's
+    environment.\footnote{c.f. Section~\ref{sec:qs-environment} }
+
+    Of .PRO files, there are three types: batchfiles, main level
+    routines, procedures and functions, distinguished by the manner of
+    their invocation. 
+
+\subsubsection{Modes of invocation}\label{sec:qs-Routines-Invocations}
+
+    \bi
+	\item \textbf{batch files}
+
+	Batch files are passed on the command line which calls the IDL
+        intepreter.\footnote{There's also a method involving the \@
+        symbol which is much like C's \#include directive, but I
+        strongly disparage this usage and never use it myself} These
+        files must be in ``single line'' mode, there must be no block,
+        looping constructs or goto's. It's as if the file is input
+        directly to the interpreter, as if you were typing them
+        yourself, line by line.  So what doesn't work on the command
+        line won't work in these sorts of files.
+
+	Needless to say, this is a pretty limited type of
+        programming. You can't do much in such a file, but you can
+        call other sorts of procedures from these files and they can
+        be as complicated as you wish, since these needn't be in
+        ``single line'' mode.
+
+	In fact, this is the method I use to call IDL from
+        at/cronjobs, I write a little batch file and then call idl
+        with that file as a parameter. All the batchfile does is
+        define some variables and then call a procedure with those
+        variables as parameters/keywords.
+
+  
+	\item \textbf{main level routines}
+
+        Main level routines are any file you execute by typing:
+
+        \IDL{.run foo} 
+
+        where ``foo.pro'' is the name of the file containing the code
+        you want to run.\footnote{You can give it some other
+        extension, but you must include that extension if you do,
+        e.g. \IDL{.run foo.bar} }
+
+	\item \textbf{Procedures/Functions}
+	
+	I'll deal in greater detail with procedures and functions a
+        little later on but these are the sorts of files you should be
+        concentrating on.
+
+    \ei
+
+    Many people write very long involved ``main level'' routines but
+    you should avoid this. It's the equivalent of writing your entire
+    program in the ``main'' routine in C, but much worse. ``Main
+    level'' routines can be invaluble when doing interactive work at
+    the command line, particularly when combined with auxilliary tools
+    such as the emacs \prit{idlwave-shell} major mode, but this method
+    of writing code is meant for small fragments and not for entire
+    programs. The weakness of this type of routine is that they can't
+    be easily debugged and they are resource hogs, since every
+    variable that is defined exists until one exits IDL or it is
+    explicitly set to zero (which frees the memory that variable uses)
+
+    Variables defined in ``procedures'' and ``functions'' are
+    local to that module, so they are destroyed by the interpreter
+    when that module exits. But when does a ``main level'' module
+    exit? The answer is: When the interpreter exits, i.e. when you
+    exit IDL.
+
+
+    If you can be assured that your code will only ever be run on a 
+    machine which has only the one user then the matter of resource
+    waste is not serious. But who of us can make this assurance?
+    Better to simply write ``procedures'' and ``functions'' and keep
+    things modularized, the way God intended man to write programs.
+
+    Finally, a word about memory. IDL creates the memory for all
+    variables larger than a scalar (scalars are stored in the variable
+    itself and require no extra memory\footnote{except strings and
+    structures, more on this latter}) on the fly and that memory is
+    retained by the interpreter until one of four things happen:
+
+    \be
+	\item The exit of the procedure/function in which the local
+              variable was created.
+	\item The user sets the variable to a scalar.
+	\item The user calls the builtin ``delvar'' passing the
+	      variable to be deleted as an argument. This can only be
+	      done at the main level. The only way for a user to
+	      delete a variable programatically is by method 2 or by
+	      using the built in ``temporary.''
+        \item The interpreter exits.
+    \ee
+
+     In all but method 4, the memory may or may not make it all the
+     way back to the system so that it can be used by other non-IDL
+     programs. The way the IDL interpreter frees memory has provoked
+     some lively debates in the newsgroup comp.lang.idl-pvwave and no
+     one fully understands it, but it is true \prit{a priori} that the
+     memory will not be freed, whatever the interpreter does after the
+     attempt has been made, unless the user uses one of methods 1
+     through 3. (Method 4 always works, of course.\footnote{I hope!})
+
+     Good programming usage necessarily gets you method \#1.
+
+     Aside from this, the most useful method is \#2. Simply setting a
+     variable to a scalar signals the interpreter that you don't need
+     the dynamic memory this variable was using. What the interpreter
+     does after this is it's own business, but at least you tried,
+     right?
+
+     The upshot? 
+
+     \be
+	\item Be aware of the memory you're using. You don't have to
+        calculate it to the last mega-byte, but you should be aware that
+        doing a 
+  
+
+       \IDL{a=bytarr(600,400,3)} 
+
+      which is about the size of a nice image that you might want to
+      write out to a jpeg file, is a pretty big array ($600*400*3=720$KB, 
+      to be exact)
+
+      \item      When you're writing a routine and you make some long
+     involved calculation that requires the creation of several large
+     arrays which you don't need after the calculation is finished,
+     set them all to some scalar to tell the interpreter you don't
+     need them anymore. 
+
+
+     \ee
+
+     Be a good neighbor. You may have moved into the neighborhood when
+     it was a big open field, and your's is the only house you can
+     see, but 10 years later you're on a half-acre lot and the people
+     around you really don't like that tannery you're running for fun
+     in your garage, capische?
+
+
+\subsection{Naming}\label{sec:qs-Programming-naming}
+
+  Routines names follow the same naming rules as variables with some
+  additional complexities which arise because of the interaction of
+  the interpreter and the underlying operating system.
+
+  I'm not going to go into all the complexities, since this is just a
+  ``quickstart'' guide. I'm going to assume you're working on a Unix
+  system.
+
+  Just do the following.
+
+  \be
+
+     \item Put your routines in a file with the same name as the
+     procedure you're defining. If you want to define a routine named
+     \prit{foo} then put it in a file named \prit{foo.pro}. When you
+     start out programming in IDL, it's best to just put \prbf{one}
+     routine per file. This will keep things simpler for you. 
+
+     There are circumstances, however, where you want to put more than
+     one routine in a file. For instance, perhaps you have a small
+     piece of utility code which is only needed in this one routine so
+     you don't really need to put it in a separate file. If you want
+     more than one routine in a file, just make sure that the routine
+     with the same name as the file is the \prbf{last} one in the
+     file. So, you could have a routine named \prit{foo} which you
+     call from the IDL prompt and it calls a little piece of utility
+     code called \prit{bar}. Than you would arrange the two routines
+     in a single file named \prit{foo.pro} with the definition for
+     routine \prit{bar}  coming first, followed by the definition of
+     the routine \prit{foo}.
+
+     And when you get further into programming and start doing widget
+     or object oriented programming, you'll find it an absolute
+     necessity to put (many) more than one routine in a file. But this
+     is just a quickstart guide, so we'll assume for the nonce that
+     you'll just be doing one routine per file.
+
+     \item Make sure this file is in the list of directories in your
+     IDL\_PATH environmental variable. It can be in your default
+     directory and the interpreter will find it, but that means you
+     have to always set your default to that directory. Hardly a
+     comprehensive solution.
+
+     \item The names of the files should be \prit{lowercase}!
+
+  \ee
+
+
+     
+\subsection{How to define a routine}\label{sec:qs-Defining-Routines}
+
+  
+  All source files that are not ``main level routines'' at some point
+  must have one or more declarations of \prit{Procedures} and/or
+  \prit{Functions}. These can be preceeded and have interspersed any number
+  of lines of comments, but the first non-comment line in a .pro file
+  must be a declaration of a procedure/function definition.
+
+  Each procedure/function starts with a declaration line giving the
+  sort of thing it is, whether procedure or function, the name of the
+  procedure/function that will be used to call it, paramter list and
+  the keyword list.
+
+  There then follows any number of IDL source language statements. 
+
+  The procedure/function definition is terminated by an ``END'' statement.
+
+  Additionally, functions have a ``Return,value'' before this ``End.''
+
+  Specifics follow:
+
+
+  \bi
+    \item \prbf{Procedures}
+
+        The first non-comment line must start with the following declaration:
+
+        \prit{pro foo [, p1, p2, p3, \ldots ,k1=k1, \ldots ,kn=kn] }
+
+        where ``foo'' is the name of the routine, i.e. the thing
+        you'll be calling at the commandline or in another routine.
+
+        Neither parameters nor keywords are required.
+
+        Example: A routine to print your current working directory.
+
+
+\begin{alltt}
+ \textbf{PRO pwd}
+  \textit{cd, current=cur}
+  \textit{print,cur}
+ \textbf{END}
+\end{alltt}
+
+%\begin{lstlisting}[frame=trbl]{}
+%	PRO pwd
+%	  cd, current=cur
+% 	  print,cur
+% 	END
+% \end{lstlisting}
+
+
+         Invocation:
+
+        If you now called this procedure from the IDL command line,
+        assuming that you current default directory was \prit{/foo/bar}
+        you'd see:
+
+        
+        \IDL{pwd}
+
+        \IDLOUT{/foo/bar}
+
+
+        Notice that this procedure takes no arguments and uses a
+        side-effect of the idl builtin routine \IDLBUILTIN{cd} to
+        retrieve the current working directory.
+
+
+    \item \prbf{Functions}
+
+        Change ``pro'' to ``function''
+
+        Preceed the terminal ``end'' with a ``return,value'' where
+        value will be the return value of the function.
+
+        Example:        
+
+
+
+\begin{alltt}
+
+\textbf{FUNCTION lonlatgrid, lonpar, latpar}
+
+; Make a latlon grid using parameters 
+; lonpar and latpar
+; the ...par variables are [min,max,inc]
+
+nlon=(lonpar[1]-lonpar[0])/lonpar[2] +1
+nlat=(latpar[1]-latpar[0])/latpar[2] +1
+lon = (findgen(nlon)*lonpar[2]+lonpar[0])#replicate(1.,nlat)
+lat = replicate(1.,nlon)#(findgen(nlat)*latpar[2]+latpar[0])
+lonlat=[ [[lon]], [[lat]] ]
+
+\textbf{RETURN, lonlat}
+\textbf{END}
+
+\end{alltt}
+
+       Notice that this routine creates and returns the variable
+       ``lonlat'' (a nlon by nlat by 2 array) as the ``value'' of the
+       function.
+
+
+       Invocation: \IDL{lonlat=lonlatgrid([0,359,1],[-90,90,1])}
+
+       You could just as easily done this as a \textit{procedure}, and returned
+       ``lon'' and ``lat'' separately in the call, as in:
+
+
+\begin{alltt}
+\textbf{PRO lonlatgrid, lonpar, latpar, lon, lat}
+
+  \prit{ same code as before \ldots }
+ 
+   ; NB. No ``RETURN'' statement!
+
+\textbf{END}
+
+\end{alltt}
+
+    \item \prbf{Main level routines}
+
+        Just for completeness sake, I include how to define one, but
+    you really should avoid using them for anything but the smallest
+    tasks, ones usually done at the command line while playing around
+    with the data. Anytime you find yourself repeatedly executing a
+    ``main level'' procedure, you should make an honest piece of code
+    out of it and turn it into a procedure or function, most likely
+     the former.
+
+    It's very easy to define one of these. You do exactly what you do
+    when defining a Procedure or a Function, except that you omit the
+    ``declaration'' line at the top. And in the case of a function,
+    you omit the ``return'' statement to.
+
+    Example: lonlatgrid as a ``main level'' procedure.
+
+
+\begin{alltt}
+
+; Make a latlon grid using parameters 
+; lonpar and latpar
+; the ...par variables are [min,max,inc]
+
+nlon=(lonpar[1]-lonpar[0])/lonpar[2] +1
+nlat=(latpar[1]-latpar[0])/latpar[2] +1
+lon = (findgen(nlon)*lonpar[2]+lonpar[0])#replicate(1.,nlat)
+lat = replicate(1.,nlon)#(findgen(nlat)*latpar[2]+latpar[0])
+lonlat=[ [[lon]], [[lat]] ]
+
+\textbf{END}
+
+\end{alltt}
+
+  All that's been removed is the 
+
+
+    \textbf{FUNCTION lonlatgrid, lonpar, latpar}
+
+  at the beginning and the
+
+
+      \textbf{RETURN, lonlat}
+
+  at the end.
+
+    Invocation: Instead of calling this function as we did above, we
+    execute it using an IDL \prbf{system} command. IDL \prbf{system}
+    commands always start with a dot and {\large may only be executed
+    at the interactive command line or from a batch file passed as a
+    parameter to the invocation of the IDL interpreter} .  Which is
+    one of the reasons why ``main level'' routines are disparaged;
+    they can't be called from other routines, more interactive routines.
+
+     So, let's say you put the code above in a file named
+     ``lonlat-mlr.pro.'' To execute it,
+    you'd do.
+
+  \IDL{.run lonlat-mlr}
+
+    Now you may be wondering how you get the lonlat grid back? In the
+    case of the function, it's returned as the ``result'' of the
+    call. In out procedure version the individual arrays were returned
+    in the call line. And what about passing parameters \prbf{into}
+    the routine? How does that work?
+  
+    These are some other reasons why ``main level'' routines are
+    deprecated, they're needlessly obfuscatory.\footnote{A remark
+    which is, itself, obfuscatory, not to mention sequipedelean.} They
+    hide the parameter passing mechanism and they make all variables
+    ``global'' which makes it easy to step on them.
+
+    The answer to these questions lies in the name of these types of
+    routines. They are ``main level'', which means they happen at the
+    same level in the calling stack as does your tappling at the
+    keyboard. They create variables just as you do when you type 
+
+    \IDL{A = findgen(100)}
+
+    and they rely on other variables just as your tappling does when
+    you say:
+
+    \IDL{B=findgen(100)*C}
+
+    If ``C'' is undefined, this statement will elicit an error message
+    from the interpreter. So, when you execute the ``main level''
+    routine \prit{lonlat-mlr.pro} by issuing the command 
+
+    \IDL{.run lonlat-mlr}
+
+    you must already have defined the two parameters required, lonpar
+    and latpar (or you may have the main level routine prompt for
+    them, if you wish) and when the routine is done the variable
+    ``lonlat'' will have magically  appeared in your environment
+    because it was created by the routine.
+
+    As I pointed out above, this makes all variables ``global'' so
+    it's easy to change the values of variables
+    inadvertantly.\footnote{it turns out you have to be careful of
+    this even when you are using procedures/functions, because named
+    variables are passed by reference.}
+
+    As an example, consider. Two files, foo.pro and bar.pro. Foo.pro
+    is a batchfile, one which you invoke by passing it as a paramenter
+    to the invocation of IDL, and it  ``calls'' bar.pro as a ``main
+    level'' routine. Here are the two source files.
+
+     ----- foo.pro -----
+
+\begin{alltt}
+a = 3.0
+print,"I'm in foo"
+print,'a = ',a
+.run bar
+print,"I'm in foo"
+print,'a = ',a
+exit
+\end{alltt}
+
+ --- bar.pro ---
+
+
+\begin{alltt}
+print,"Im in bar"
+a = 2
+print,"a = ",a
+END
+\end{alltt}
+
+    And here's the invocation:
+
+    \SH{idl foo.pro}
+
+    This ``program'' outputs the following:
+
+\begin{alltt}
+IDL Version 5.3 (IRIX mipseb). (c) 1999, Research Systems, Inc.
+Installation number: 12619.
+Licensed for use by: Jet Propulsion Lab
+
+I'm in foo
+a =       3.00000
+% Compiled module: $MAIN$.
+Im in bar
+a =        2
+I'm in foo
+a =        2
+\end{alltt}
+
+    You'll notice that the value of the variable ``a'' changed and
+    that it remained changed when execution left bar.pro and returned
+    to foo.pro. That's because there really isn't any difference
+    between the two environments.
+    
+
+    It's not the fact of the variable changing that's the problem, but
+    the surreptiousness of the change. It makes these programs hard to
+    debug and hard to understand.
+
+
+    Well, enough of my rant.
+
+    You can also define these sorts of routines at the command line, as
+    indeed you can do with procedures and functions as well, just
+    issue a 
+
+   \IDL{.run}
+
+    The interpreter will issue prompts consisting of a single dash
+    (``-'') until you type ``END''. When it sees the END statement, it
+    will compile the code you've typed in. If you've defined a
+    procedure or a function, that will be the extent of it's actions,
+    but you will now be able to use the procedure/function you've just
+    defined. If you type in a ``main level'' procedure, the
+    interpreter will also \prbf{execute} the code.
+
+    
+\ei
+  
+\subsection{Control
+  Structures}\label{sec:qs-Control-Structures}\index{Variables!Structures}
+
+  Without some way to indicate to the interpreter/compiler that the
+  following N statements are to be taken as a block, you
+  have to type everything on one line. This is the way you have to
+  work at the command line, unless you create a \prit{Main Level
+  Program} on the fly. 
+
+  Only in procedures/function, and other such programs which are
+  compiled\footnote{The \prit{Main Level Program} mentioned above},
+  may one use multi-line ``BLOCK'' constructs. These are the
+  equivalent of braces in C and allow for more than one statement to
+  be executed within a particular control structure. They are
+  delimited by a \prit{begin} at the beginning of the block and an
+  \prit{end} at the end of it. Each particular control structure has
+  it's own particular type of end statement (e.g. IF \ldots THEN BEGIN
+  \ldots ENDIF) but the use of the \prit{specific} end type is
+  optional. One may chose to use the generic \prit{END} instead of the
+  \prit{endif} given above and it would work just as well.
+
+  I'm going to give you the more important control structures. You can
+  look the more esoteric ones up at your leisure. In the discourse
+  below, \T stands for ``some kind of test statement,'' e.g. ``A
+  le 1,'' while \E stands for ``some kind of executable
+  statement,'' e.g. A = A + 1.  I haven't gone over the Boolean
+  constructs in IDL yet, but just assume that they work more or
+  less like in Fortran or C.
+
+  A word on the ``test'' statements. They must be scalars and the
+  variables being tested must exist. So, if A is an array, the
+  statement
+
+  \IDL{If A lt 1 then \ldots }
+
+  will elicit an error from the interpreter.
+
+  Think about it: A is an array, A Le 1 is \prbf{also} an array. It as
+  a ``1'' wherever A is $<$ 1 and zero otherwise. 
+
+  Personally, I would love to see IDL change this behavior so that it
+  could work with arrays; i.e. something like 
+
+   `If there is \prbf{any} elements of the array (A LE 1) which is
+  ``true'' then the conditional is true, otherwise it's false. 
+
+
+  But that's a whole other kettle of fish, and it's not the way it
+  works currently.
+
+  This fact has consequences if you put the return from functions
+  into tests. For instance, if you do something like:
+
+  \IDL{If foo(X) LE 1 then \ldots}
+
+  You'd better be sure that the function ``foo'' only ever returns a
+  scalar. And a scalar is \prbf{not} the same as an array with only
+  one element!
+
+  So have a care.
+
+
+  \subsubsection{IF/THEN}\label{sec:qs-If-Then}\index{if/then/else}
+
+    \begin{itemize}
+      \item \prbf{Single Line}
+
+         \prbf{IF \T  THEN  \E ELSE \E}
+
+        Example: 
+
+       \IDL{if n gt 1 then sig=((xx-n*u)/(n-1)) else sig=-1}
+
+
+      \item \prbf{Multi Line}
+
+
+        \begin{alltt}
+
+            \textbf{IF \T THEN BEGIN}
+              \EI{1}
+              \EI{2}
+            \textbf{ENDIF ELSE BEGIN}
+              \EI{3}
+              \EI{4}
+            \textbf{ENDELSE}
+
+        \end{alltt}
+
+        You can ramify this construct into as complex an entity as you
+        wish, as in \ldots
+
+
+        \begin{alltt}\index{if/then/else}
+
+            \textbf{IF \T THEN BEGIN}
+              \EI{1}
+              \EI{2}
+            \textbf{ENDIF ELSE IF \ldots THEN BEGIN }
+
+                \ldots
+
+            \textbf{ENDIF ELSE IF \ldots THEN BEGIN }
+
+                \ldots 
+
+            \textbf{ENDIF ELSE BEGIN}
+              \EI{3}
+              \EI{4}
+            \textbf{ENDELSE}
+
+        \end{alltt}
+
+
+         You may also leave out a block, as in \ldots
+
+        \begin{alltt}\index{if/then/else}
+
+            \textbf{IF \T THEN \E ELSE BEGIN}
+              \EI{1}
+              \EI{2}
+            \textbf{ENDELSE}
+
+
+        \end{alltt}
+
+
+        And similarly for the \prit{ELSE} side of the construct.
+
+        There really isn't any need for complicated
+        \prit{IF/THEN/ELSEIF/ELSE} constructs in IDL. This
+        functionality is more flexibly handled with the
+        \prit{CASE/ENDCASE} structure. More on this later.
+
+    \end{itemize}
+
+  \subsubsection{FOR/DO}\label{sec:qs-For-Do}\index{for/do}
+
+    For looping over something a known number of times. This works
+    just like all looping constructs in other languages, the iterator
+    is set to the initial value and is tested against a final value
+    before executing the loop.\footnote{which means you can write
+    loops that won't get executed.} If it passes the test, the loop
+    executes, whereupon the iterator is ``incremented'' by the step
+    value, which defaults to ``1'' and the process is repeated. Once
+    the iterator ``exceeds'' the limit control passes to the the next
+    statement following the loop.
+
+    I put quotes around ``incremented'' and ``exceeds'' for the
+    following sensible reason. The increment may be negative and the
+    limit less than the start value, just as in all normal programming
+    languages.
+ 
+    There is one thing to be aware of, one \prbf{gotcha}. Until IDL
+    5.3, which allows you to set the default integer to
+    longword\footnote{See the COMPILE\_OPT, defint32; this statement
+    makes all integer variables which are not explicitly declared be
+    of \prit{longword} type}, unless you specify that the loop
+    variable is a longword, it will default to a signed short, with
+    the result that you won't be able to loop over anything having
+    more than 16767 elements. That's why I almost always explicitly
+    specific the starting elements as a longword. See below.
+
+
+    \begin{itemize} \item \prbf{Single Line}
+
+        \prbf{FOR I=long(startval),stopval [,step] do FOO }
+
+	You can say \prbf{for i=nL,m \ldots} if you know the start
+        value explicitly before you start.
+
+        Example: Repeatedly calling a processing routine, once for
+        each file.
+
+        \prbf{FOR I=0l, n\_elements(files)-1  do process\_file,files[i] }
+
+     \item \prbf{Multi Line}\index{for/do}
+
+
+\begin{alltt}
+
+\textbf{FOR \prit{iter}=start,stop [,step] DO BEGIN}
+  \textit{do stuff}
+  \textit{do more stuff}
+\textbf{ENDFOR}
+
+\end{alltt}
+
+       Example: Same as above, but with a little more flesh on it.
+
+\begin{alltt}\index{for/do}
+
+\textbf{FOR i=0L,n_elemenets(files)-1 DO BEGIN}
+  \textit{status = read_file(files[i],data)}
+  \textbf{IF status eq 1 THEN BEGIN}
+    \textit{status = make_picture(data)}
+  \textbf{ENDIF ELSE BEGIN}
+    \textit{message,'Error reading file',/info}
+    \textit{return}
+  \textbf{ENDELSE}
+
+
+\textbf{ENDFOR}
+\end{alltt}
+
+    \end{itemize}
+
+   \prbf{\large Warning!}
+
+   Many novice IDL programmers see For/Do loops as the way to create
+  variables having symetrically spaced values in them. Resist this
+  temptation! The way to create such variables is with the
+  \prbf{indgen} family of routines. 
+
+
+  For instance, say you want to create an index running from 0 to 1 in
+    steps of 0.01? You'd be tempted to do:
+
+
+\begin{alltt}\index{for/do}
+  X = fltarr(100)
+  \textbf{FOR i=0,100 DO x[i] = 1-0.01*i}
+\end{alltt}
+
+    This is Fortran or C code masquerading as IDL. It's \prbf{very
+    bad}.\footnote{Go sit in the corner!}
+
+    Better to use the native IDL code, a la:
+
+
+    \IDL{x=reverse(findgen(101)*0.01)}
+
+  Say you  want to create a ``sine'' wave with the sine for each degree? Fine! Do 
+
+
+  \IDL{y=sin(findgen(360)*!pi/180)} 
+
+   and be done with it!
+
+
+  \subsubsection{DO/WHILE}\label{sec:qs-Do-While}\index{do-while}
+
+    Do/while is like most other Do/Whiles. It's common use is for
+  those cases when you don't know, a priori, how many times you're going
+  to be going through the loop, and you want to test the condition
+  \prbf{before} the first loop. It can be used as a substitute for a
+  \prbf{FOR \ldots DO BEGIN \ldots ENDFOR} loop.
+
+   While loops are sometimes used in their single line form, but
+  usually they are multi-line constructs
+
+    \begin{itemize}
+      \item \prbf{Single Line}
+
+\begin{alltt}\index{do-while}
+ str = ``This is a string with the number 10 in it''
+ tmp=byte(str)
+ ; tmp is now a ``byte'' array. We'll loop through to find 
+ ; the character position of the digit ``1''\footnote{much more easily
+ ;   done using the builtin \IDLBUILTIN	{strpos} }
+
+ i=0
+ while tmp[i] ne '1' do i=i+1
+ num=fix(strmid( str,i,2))
+
+\end{alltt}
+
+         ``num'' now equals the short integer ``10''
+          Why anyone would want to actually do this, I don't know.
+        
+      \item \prbf{Multi Line}
+
+        The basic structure is:
+
+
+\begin{alltt}\index{do-while}
+
+\textbf{WHILE some\_test DO BEGIN}
+  \textit{do stuff}
+\textbf{ENDWHILE}
+
+\end{alltt}
+
+        Example: 
+
+        Say you have a file with alternating structures of arbitrary
+        numbers of comments delimited by a ';' in the first column and
+        arbitrary numbers of rows containing 4 columns of data. This
+        sort of format is hard to read in any truly fast way, you basically
+        have to read the whole file, checking line by line.
+
+        Let's assume that are fewer than 1000 lines containing actual
+        data, so we can pre-dimension some arrays. If this weren't the
+        case, we'd check to see if we're about to run off the end of an
+        array and redimension it, if need be.
+
+\index{get\_lun}\index{error=err}\index{openr}\index{message}
+\index{reads}\index{strmid}\index{eof}
+\begin{alltt}\index{do-while}
+
+openr, lun, ``/foo/bar'', /get_lun, error=err
+\textbf{IF err ne 0 THEN BEGIN }
+  Message,!error_state.msg,/cont
+  return
+\textbf{ENDIF }
+  
+recno=0
+data=fltarr(4,1000) ; here we do have to predefine it
+frec=fltarr(4)
+rec=''
+\textbf{WHILE not eof(lun) DO BEGIN}
+  readf, lun, rec
+  IF STRMID(rec,0,1) ne ';' THEN BEGIN
+    READS,rec,frec; read from 'rec' into 'frec'
+    data[*,recno] = frec
+    recno=recno+1
+  ENDIF
+\prbf{ENDWHILE}
+data=data[*,0:recno-1] ; get rid of unused portion.
+free_lun, lun ; close the file 
+              ; (but only when used with /get_lun!)
+
+\end{alltt}
+
+    \end{itemize}
+
+
+  \subsubsection{REPEAT/UNTIL}\label{sec:qs-Repeat-Until}\index{repeat/until}
+
+    Repeat/until is that looping structure you use when you
+  \prbf{know} you want to execute at least \prbf{once}. It's the
+  direct analog of C's \prbf{do \ldots until} construct.
+
+
+
+    \begin{itemize}
+      \item \prbf{Single Line}
+
+          Say you have a file, opened on unit ``LUN'' with some
+          arbitrary number of comment header lines, which begin with a
+          ';' in the first column and you don't care about these
+          comment lines. Do this to read past this ``header.''
+
+\begin{alltt}\index{repeat/until}
+  \textit{rec=''}
+  \textit{repeat readf,lun,rec until strmid(rec,0,1) ne ';'}
+\end{alltt}
+
+      \item \prbf{Multi Line}
+
+        Same as above, but now the header info has ``keyword=value'' pairs
+        which you want to save.
+
+\begin{alltt}\index{repeat/until}\index{get\_lun}\index{error=err}\index{message}
+  openr, lun, ``/foo/bar'', /get_lun, error=err
+  \textbf{IF err ne 0 THEN BEGIN }
+    Message,!error_state.msg,/cont
+    return
+  \textbf{ENDIF }
+
+readf, lun, rec
+\textbf{REPEAT BEGIN}
+  rec=strmid(rec,1,strlen(rec)-1) ; chuck the comment character
+  rec=strcompress(rec,/remove_all); remove all spaces
+  s=execute(rec); See notes below!
+
+  \textbf{IF s ne 1 THEN BEGIN}
+    message,''Can't create variable using `` + rec,/continue
+    return
+  \textbf{ENDIF}
+  
+  readf,lun,rec
+\textbf{ENDREP UNTIL strmid(rec,0,1) ne ';'}
+
+\textit{process the rest of the file}
+
+\end{alltt}
+
+       A couple of things to notice about this example.
+
+
+      \be
+      \item \prbf{The \prit{readf,lun,rec} just before the \prbf{endrep}}
+
+        It's required. Otherwise, this code would attempt to subject
+        the first non-comment record in the file to the same
+        processing as the last comment record.
+
+      \item \prbf{The ``execute'' statement}\index{execute}
+        
+        This is a little IDL legerdemain which allows one to
+        ``execute'' a string as if it were a statement occuring right
+        in the program. It's the IDL equivalent of ``eval'' or
+        ``exec'' in various Unix shells and other interpreters like
+        Perl.
+
+        So, if \ldots
+
+        rec = ``datetime = '2001/04/05 00:02:03.456' ''
+
+        Then the result of the line 
+
+        \IDL{s=execute(rec)}
+
+        would be that a variable named ``datetime'' with the value
+        '2001/04/05 00:02:03.456.' would exist in the current program
+        context. 
+
+        Kinda magical, isn't it? But much the same sort of thing that
+        can be done in shell and perl scripts with ``exec'' and
+        ``eval.''
+
+        By the way, this is a very convenient way to store variables
+        in a file, particularly when combined with structure
+        definitions, since the program doesn't need to know \prit{a
+        priori} the names of the variables in the file and you can use
+        it to construct structures blindly, as 'twere, but it's
+        computationally expensive and should only be used when there's
+        only a few such keyword=value pairs.
+
+        \item \prbf{The use of the \prsl{message} procedure}\index{message}
+
+        The ``message'' is the IDL analog of C's catch/throw mechanism
+        of error handling. It prints a message to the console
+        \prbf{and} throws an error, which can be used in conjunction
+        with the \IDLBUILTIN{catch} routine to do error handling.
+
+      \ee
+
+    \end{itemize}
+
+  \subsubsection{CASE OF}\label{sec:qs-Case-Of}\index{case-of}
+
+        The ``Case'' block is like the C switch statement, except that
+        it's more powerful. It's functionally equivalent to a multi
+        branch IF/THEN/ELSEIF/ELSE/ENDELSE construct. Unlike the C
+        version, it checks for a Boolean condition, of which matching
+        a single character, which is how the C version works, is a
+        subset. It works by comparing the argument against each of a
+        list of values in turn. If one matches it takes that
+        branch. If none match it either fails with a run time error or
+        it takes a default branch if it is present.
+
+        The basic structure is:
+
+
+      \begin{alltt}\index{case-of}
+
+      \textbf{CASE test OF}
+          \textit{test1: BEGIN}
+             \textit{do stuff for test1}
+          \textit{END}
+          \textit{test2: BEGIN}
+             \textit{do stuff for test2}
+          \textit{END}
+          \textit{ELSE: BEGIN}
+            \textit{do stuff for default case}
+          \textit{END} 
+      \textbf{ENDCASE}
+
+      \end{alltt}
+
+
+        You can turn any one of the branches in the case statement
+        into a one like version. Just get rid of the \prbf{begin/end}
+        pair and put the single statement just after the ':', like
+        this:
+
+\begin{alltt}\index{case-of}
+\textbf{CASE test OF}
+  test1: single statement for test 1
+  test2: BEGIN
+    do stuff for test2
+    do more stuff for test2
+  END
+  ELSE: BEGIN
+    do stuff for default case
+  END
+\textbf{ENDCASE}
+\end{alltt}
+
+        It's easier to understand the CASE construct by means of
+        examples. So here's one.
+
+       Say you have some graphic routine that writes an image. The
+       code that actually creates the graphic is generic, but you have
+       to do different things depending on which image format has been
+       chosen to output. This would be a natural use for a
+        CASE. Assume that ``ext'' is a string variable containing one
+        of the three strings ``.jpg'',''.png'' or ``.tiff.''
+
+\begin{alltt}\index{case-of}
+ \textbf{CASE ext OF}
+  ``.jpg'': write_jpg, image, filename
+  ``.png'': write_png, image, filename
+  ``.tiff'': write_tiff, image, filename
+  ELSE: Message, ``Unknown extension:'' + ext
+ \textbf{ENDCASE}
+\end{alltt}
+       
+        As a special case, you can have it match against 'True', by
+        using a ``1'' in the test, instead of matching the value of a
+        variable, as with ``ext'' above. This method is general
+        and all case statements that aren't of the \prit{CASE 1 of}
+        can be rewritten so they are. If I were to rewrite the example
+        above, it would look like:
+
+\begin{alltt}\index{case-of}
+\textbf{CASE 1 OF}
+  ext eq ``.jpg'': write_jpg, image, filename
+  ext eq ``.png'': write_png, image, filename
+  ext eq ``.tiff'': write_tiff, image, filename
+  ELSE: Message, ``Unknown extension:'' + ext
+\textbf{ENDCASE}
+\end{alltt}
+
+  One last comment on Case statements. It is a runtime error is none
+  of the cases match.
+
+
+\subsection{Environment}\label{sec:qs-environment}\index{IDL\_PATH}\index{IDL\_STARTUP}\index{IDL\_DIR}
+
+     IDL depends on several environmental variables, IDL\_PATH and
+     IDL\_STARTUP and IDL\_DIR. In order for these to work, they must
+     be defined before entering IDL.
+
+
+\subsubsection{Setting up the environment}\label{sec:qs-environment-setup}
+
+  Usually your system administrator will have set up the environment
+  by sourcing one of the scripts RSI provides in one of the system
+  level configuration files. In my experience (as of IDL 5.4) The
+  pertinent script is named something like idl\_setup (or
+  idl\_setup.ksh for users of the Korn shell) and it lives in the bin
+  subdirectory of the idl distribution. Frequently, the fully
+  qualified location is /usr/local/rsi/idl/bin/idl\_setup, but your
+  sysadmin may put the distribution in /opt or /usr/share. Sourcing
+  this file will, at a bare minimum, define IDL\_DIR. Check your
+  environment, if this environment variable isn't defined either get
+  your sysadmin to fix the matter or search around under the usual
+  places for third-party software for the ``rsi'' subdirectory until
+  you find the setup file. Then source it yourself in your .login (for
+  csh users) or .profile (for Korn shell users). Bash users may have
+  to make a copy of idl\_setup.ksh and edit it to fix some of the
+  syntax that seems very Korn shell specific. At least, I did. But I'm
+  a novice Bash user so I may have misinterpreted the errors I was
+  getting.
+
+  In anycase, here are the meanings and uses of the other
+  environmental variables.
+
+\subsection{The IDL\_ \ldots environmental variables defined}\label{sec:qs-env-variables-specifics}\index{IDL\_PATH}\index{IDL\_STARTUP}\index{IDL\_DIR}
+ 
+   \bi 
+    \item IDL\_PATH\index{IDL\_PATH}
+
+     IDL\_PATH is the standard unix path variable, except that it
+     tells the IDL interpreter to find the IDL files. There are,
+     however, two differences.
+        
+     \begin{enumerate}
+       \item The Plus sign  (``+'') semantics\index{IDL\_PATH + syntax}
+
+         If you put a plus sign ``+'' in front of an element of this
+         path, the interpreter will recursively descend starting
+         from that directory, adding directories as it goes. This
+         means that if you keep all your code in subdirectories of your \~/idl
+         directory, you need only at ``+/your/home/dir/idl'' to the
+         IDL\_PATH and the interpreter will do the rest for you.
+
+        Example:
+
+        setenv IDL\_PATH +/home/whdaffer/idl:+/system/software/idl
+
+         IDL will recurse through all directories below my ``idl''
+	     directory adding to its search path any directory it finds
+	     that has a ``.pro'' file in it. It does the same for
+	     directories below and including /system/software/idl.
+        
+      \item $<$IDL\_DEFAULT$>$ semantics\index{IDL\_DEFAULT}
+
+        You should alway end your path with $<$IDL\_DEFAULT$>$\.
+        This is the path to RSI supplied .pro files. 
+
+     \end{enumerate}
+
+     Example: 
+
+       setenv IDL\_PATH ``+/home/whdaffer/idl:$<$IDL\_DEFAULT$>$''
+
+     This will find all the .pro files in any directory below and
+     including /home/whdaffer/idl and all the default .pro files which
+     RSI provides.
+  
+     It's important to understand this syntax. You don't have to put
+  \prbf{every single directory} into your IDL\_PATH! All directories
+  which share a common parent, say \prit{/foo/bar}  will be included
+  by just putting \prit{+/foo/bar} in the IDL\_PATH and IDL will do
+  the work of recursing the tree for you!
+
+
+   \item IDL\_STARTUP\index{IDL\_STARTUP}
+
+     IDL\_STARTUP should point to file which has configuration
+     commands in the IDL language to configure the user environment. It
+     is run each time IDL starts, so have a care which commands you put
+     in there.
+
+
+     A natural set of commands to put into IDL\_STARTUP are those
+     which configure the graphics environment. 
+
+
+     If you're lucky enough to have a graphics card that can do it, and
+     until you become more familiar with the ins-and-outs of configuring
+     the graphics environment, put the following in your IDL\_STARTUP file.
+
+    \begin{verbatim}
+       device,pseudo=8
+       window,colors=256,/free,/pixmap,xsize=10,ysize=10
+       wdelete,!d.window
+    \end{verbatim}
+
+    This will set your graphics environment to use 8 bit color with
+    256 colors.
+
+   However, most current (2005 )PC computer graphics cards can't do 8
+   bit color, so the next best thing is to emulate 8 bit color by
+   putting this in your startup file
+
+    \begin{verbatim}
+       device,true=24,decomposed=0
+    \end{verbatim}
+
+    You'll know if your card can't do pseudo-color if you try
+    ``device,pseudo=8'', then try to plot something and see the
+    following error 
+
+    \begin{verbatim}    
+	Unsupported X Windows Visual (class: PseudoColor, depth 8).
+`	Substituting default (class: TrueColor, Depth 24)
+    \end{verbatim}
+
+
+
+    \item{IDL\_DIR} 
+
+     Points to the top of the IDL distribution. It's used by IDL to find
+     the appropriate executables and data that comes with that
+     distribution. RSI supplies several shell initialization files
+     (idl\_setup, idl\_setup.bash and idl\_setup.ksh) which should be
+     ``sourced'' as part of your shell initialization
+
+  \ei
+
+
+\subsection{Program Calling}\label{sec:qs-calling-programs}
+  
+   As mentioned above, there are two types of programs in IDL that
+  require parameters passing: Procedures and Functions. Procedures are
+  like Fortran subroutines (without the 'Call' syntax) and functions
+  are, well \ldots like functions, that is, they return values.
+
+   All procedures and functions have two types of thing that can be
+  passed them: \prit{positional parameters} and
+  \prit{keywords}. Positional parameters are just like the sort of
+  parameter passing in ``C'' and ``Fortran'' and just about every
+  other language you've ever seen, the first one in the call list is
+  moved into the first one in the declaration list in the source file
+  which defines the program, i.e. they line up one-to-one. If you pass
+  fewer positional parameters than are declared in the source file,
+  the remainder will be undefined in the program, and you can't skip one
+  in the middle, although you can pass an undefined quantity. An important use of
+  the routine n\_elements()\index{Useful Routines!n\_elements()} inside of
+  procedures/functions is checking for this; whether input arguments
+  are defined.  Keywords have the calling syntax \prit{keyword =
+  value}. Keywords can be placed in any order in the call because they
+  are recognized by their name. They can even be interspersed with the
+  parameters, the interpreter will untangle the call appropriately.
+
+  All variables are passed by reference, just as in Fortran, except
+  constants and expressions, which are passed by value.
+  ``Expressions'' are the results of operations (e.g. a*2) or array
+  indexing/slicing (e.g. A[0:2]) or temporary returns from function
+  calls (e.g. sqrt(4)) because they aren't being assigned to a
+  persistent variable.
+
+  \begin{itemize}
+
+   \item \prbf{Procedures}\index{Procudures!calling}
+
+   \IDL{foo, a,b,c,k2=bar,/k1, k3=baz}
+
+    Here I've called a procedure, named ``foo'', which passes three positional
+    parameters (a, b and c, in that order) and three keywords, k1, k2
+    and k3.\index{positional parameters}\index{keywords}
+  
+    The keywords K2 and K3 make sense, since these are ``equated'', in
+    the sense of ``assignment'' to something in the call, so it's
+    clear that I want to pass the variable 'bar' by means of k2 and
+    the variable 'baz' through k3.
+
+    K1 looks different, but in fact it's not. This call is just semantic
+    sugar, it means exactly the same as ``k1=1.''  This sort of syntax
+    is good for keywords that are ``flags'', that serve some ``boolean''
+    function, i.e. you really just want to check whether a keyword is
+    set or not, you don't care about it's ``value.''
+
+    Notice I've said \prbf{absolutely nothing} about whether these
+   quantities are input or output! And with the exception of the
+   ``k1'' keyword, which can only be input,\footnote{You can't assign
+   to a constant} it's because it doesn't matter. These quantities can
+   be input, output, or both.
+
+     Now, if I had, instead, executed ``foo'' by typing :
+
+    \IDL{foo, 1,k2=3,2,3,/k1,k3='baz'}
+
+    Then it's clear all of these quantities are \prbf{input} only,
+    since IDL can't store an output quantity into a constant. It isn't
+    an error, the interpreter won't complain, but obviously it won't
+    do what it's programmed to do either.
+
+   
+    Notice also that I mixed up the parameters/keywords. This isn't a
+    mistake, IDL will untangle everything. I wouldn't recommend doing
+    this, as it needlessly obfuscates the code\footnote{Just like that
+    comment}, but nothing bad will result if you do.
+
+  \item \prbf{Functions}\index{Functions!defining}
+        \index{positional parameters}\index{keywords}
+  
+   Functions return values, it's a simple as that. So when you call
+   them, you assign their output to some variable.
+
+  \IDL{bar=foo(a,b,/k1,k2='baz',k3=3*sin(indgen(10)\#barf))}
+
+   Here, a and b are positional parameters, ``k1'' is one of those
+   funny short hand keywords meaning k1=1, k2 is set to the string constant
+  ``baz'' and k3 is set to the return of some complicated expression
+   involving all sorts of things including a matrix multiplication.
+
+  By all the rules I've stated about parameter/keyword passing,
+  clearly, only ``a'' and ``b'' \prit{may} return values, but ``bar''
+    \prbf{must}!
+
+  \end{itemize}
+
+
+
+\section{Plotting and Graphics}\label{sec:qs-Plotting}
+
+   
+   
+
+   There are two types of graphics systems in IDL, ``direct'' and
+  ``object.'' I won't be discussing ``object'' graphics at all, so forget
+  it exists.
+
+  As stated above, I'm assuming that we're working in 8-bit color on
+  the X-Windows system. I'll touch upon 24 bit color very breifly at
+  the end. But even if we aren't on an 8-bit system we can emulate one
+  by setting 
+
+  \IDL{device,decomposed=0}\index{graphics!decomposed color}
+
+  Doing that tells IDL to act as if it's an 8-bit PseudoColor system
+
+
+  There are four broad categories in ``direct'' graphics (hereinafter
+  simply ``graphics''), 2-d plots, 3-d plots, geographic mapping and
+  images.
+
+  A word about the first three and about coordinate transforms.
+
+  When you execute any direct graphics command, except
+  TV\index{graphics!TV} -- which is used for displaying rasters and
+  consists of just turning pixels on and off, that is, there's no
+  mapping from data to device space -- the IDL graphics subsystem must
+  calculate which device pixels to turn on given the coordinates,
+  usually in data space, you've passed in the command. Some commands
+  presuppose the existence of this coordinate transforms while others
+  create them anew. If you get the two broad categories mixed up, you'll
+  be seeing a lot of error messages.
+
+  \prbf{Commands which create the transform:} plot, surface, contour
+  (unless ``overplot'' is set), map\_set.
+
+  \prbf{Commands which assume a coordinate transfer function:} oplot,
+    plots, contour (if ``overplot'' is set),  map\_continents, map\_grid.
+
+  To move between different output devices, one uses the
+  \IDLBUILTIN{set\_plot,device} procedure, where ``device'' is a string
+  signifying one of the accepted output devices. The default device is
+  ``X''.
+
+  Besides this device, the most commonly used devices are:
+
+  ``z'': to use the Z buffer.
+  ``ps'': for Postscript output.
+
+   
+  Once \IDLBUILTIN{set\_plot} is called to set the output device, one
+    configures it useing calls to the \IDLBUILTIN{device} builtin.
+
+  \IDLBUILTIN{device} is the generic procedure used to configure whatever
+  the graphics device is. It has many keywords, approaching one
+  hundred, and only a subset is apppropriate to any particular
+  device.  If you've done what I've told you to do in
+  Section~\ref{sec:qs-environment} regarding how to set your graphics
+  system up, you shouldn't have to make any calls to \IDLBUILTIN{device}
+  unless you send output to some other device. I'll discuss this
+  below, in the section of Hardcopy, Section~\ref{sec:qs-hardcopy}.
+
+  \subsection{Routines}
+  \begin{itemize}
+    \item \prbf{2-d plots}
+   
+        \begin{itemize} 
+          \item
+	       \prbf{plot}\index{graphics!plot}\index{plot}
+               \index{Useful Routines!Plotting!plot}
+
+            plot,Y -- Plots Y against its index. (This is exactly
+		equivalent to plot,indgen(n\_elements(Y)),y)
+
+            plot,X,Y -- plots Y against X.
+            
+            Each call to plot clears the current graphics window
+            \footnote{unless the system variable !p.multi[2] or !p.multi[3]  is
+            non-zero. If so, the graphics window is cleared whenever
+            !p.multi[0] = 0. !p.multi is the way you put multiple
+             plots on the same page or screen}
+
+          \item \prbf{oplot}\index{graphics!oplot}\index{oplot}
+               \index{Useful Routines!Plotting!oplot}
+
+            A previous call to some graphics routine (e.g. ``plot'')
+            which establishes the graphics state of the current window
+            is required before ``oplot'' can be called. And, since
+            ``oplot'' uses the current environment, it's entirely
+            possible that this command will result in \prbf{no data}
+            being drawn to the screen. (Why?)
+
+              oplot,y -- Overplots Y against its index in the
+              current graphics window. 
+
+              oplot,x,y -- Overplots Y against X in the current graphics window. 
+
+          \item \prbf{plots}\index{plots}\index{plots}
+               \index{Useful Routines!Plotting!plots}
+
+            Think of this as ``PlotS'' for \prit{plot symbols}.
+   
+            Like ``oplot'' this requires a previous call to some
+            graphics routine that sets the graphics environment. It
+            also requires \prbf{both} ordinate and coordinate arrays.
+
+            plots,X,Y -- Plot Y versus X
+
+          \item \prbf{variables pertaining to all of these routines.}
+
+             \begin{description}
+               \item psym: The symbol to use, 0 through 10, excluding
+                8 and 9. 8 is the ``usersym'' symbol, i.e. it's one you
+                define. ``9'' simply doesn't exist. ``10'' means
+                ``plot in histogram mode,'' i.e. make boxes. If psym
+                is $<$ 0, IDL will plot the symbol and connnect them
+                with lines.\index{graphics!system variables!psym}
+
+               \item symsize: How big to make that symbol
+			   \index{graphics!system variables!symsize}
+
+               \item linestyle: What sort of line to use.
+			   \index{graphics!system variables!linestyle}
+
+               \item color: The color to plot the things, may be a
+                     vector but if so must be the same size as ``Y''
+                     (and ``X'')
+			   \index{graphics!system variables!color}
+
+               \item Xrange: limit the X range of the data (plot only)
+			   \index{graphics!system variables!yrange}
+
+               \item Xrange: limit the Y range of the data (plot only)
+			   \index{graphics!system variables!xrange}
+
+               \item Thick: How thick to make the lines.
+			   \index{graphics!system variables!thick}
+
+               \item position: Where to put the plot (must be
+                     specificed in ``normal'' coordinates)
+			   \index{graphics!system variables!position}
+
+               \item /data|/device|/normal: Use the specified
+                     coordinate system. Default is ``data'' 
+                     Don't worry about this one until you've played
+                     around a bit. If all you do is plot your data,
+                     you won't have to think about the difference
+                     between data, device and normal coordinates.
+			   \index{graphics!data coordinates!specifying}
+			   \index{graphics!device coordinates!specifying}
+			   \index{graphics!normal
+			   coordinates!specifying}
+
+	             However, if you use TV, then want to apply to data
+			   points to the TV'd raster, you'll probably
+			   have to think about the difference between
+			   ``data'' and ``device'' coordinates. If you
+			   apply annotations or colorbars, you'll
+			   probably have to think about how normal
+			   coordinates work. 
+
+			   Fair warning.
+
+               \item Xticks/Yticks/XtickV/YtickV/Xtickformat/Ytickformat   \ldots 
+                Changes the number of ticks, the format used in
+                printing annotations, etc \ldots. I don't use these
+                that much, but I do occasionally to make the plot do
+                \prbf{exactly}\footnote{well, almost} what I want. You
+                should just be aware that there is more control over
+                how the axes appear.
+
+			   \index{graphics!system variables!xticks}
+			   \index{graphics!system variables!yticks}
+
+			   \index{graphics!system variables!xtickv}
+			   \index{graphics!system variables!ytickv}
+
+			   \index{graphics!system variables!xtickformat}
+			   \index{graphics!system variables!ytickformat}
+
+
+               \item \ldots Hell, just look it up in IDLHELP!
+
+             \end{description}
+
+        \end{itemize}
+    \item \prbf{3-d plots}
+       \begin{itemize}
+
+         \item \IDLBUILTIN{surface}\index{surface}
+	       \index{graphics!plotting!surface}
+	       \index{Useful Routines!Graphics!surface}
+
+           Allows plotting of surface (i.e. 2-d) variables.
+
+           surface,Z -- Plots the 2-d array Z against its indices.
+
+           surface,Z,X,Y -- plots Z against X and Y
+          
+             Either X and Y must have the same dimensionality as Z, or
+            X must have as many columns as Z has columns and Y as many
+            columns as Z has rows. (you figure it out!)
+
+         \item \IDLBUILTIN{contour}\index{contour}
+	       \index{graphics!contour}
+	       \index{Useful Routines!Graphics!contour}
+
+
+           Contouring of data, the flattened version of surface.
+
+           Contour,Z -- Make contours of Z against indices.
+          
+           Contour,Z,X,Y  -- Same as above, but use coordinate arrays
+            X and Y. The same restrictions apply here as with ``Surface''
+
+         \item \IDLBUILTIN{shade\_surf}\index{shade\_surf}
+
+	       \index{graphics!shade\_surf}
+	       \index{Useful Routines!Graphics!shade\_surf}
+
+           Same as ``Surface'', but you can supply a ``shading'' to
+            the surface, which is effectively a third dimension.
+
+          \item \prbf{variables pertaining thereto}
+
+           Variables for all 3-d routines.
+
+           t3d, save, xrange, yrange, zrange
+
+           Variables specific to \ldots
+
+           \begin{itemize}
+             \item \IDLBUILTIN{Surface}\index{surface}
+                
+               az,ax,ay -- the 'aspect' or rotation with respect to
+               these axes.
+        
+               
+             \item \IDLBUILTIN{Contour}\index{contour}
+
+               overplot, noerase, Z, fill, cell\_fill, follow, levels,
+               nlevels, c\_colors, bilinear
+
+             \item \IDLBUILTIN{shade\_surf}\index{shade\_surf}
+
+               shades. The shades to color the elevations with.
+
+           \end{itemize}
+       \end{itemize}
+
+    \item \prbf{Images}\index{Images Graphcs}\index{Graphics!Images}
+       \begin{itemize}
+         \item \IDLBUILTIN{TV}\index{tv}\index{Graphics!Images!TV}
+	       \index{Useful Routines!TV}
+
+           TV is the method you put an image on a window.
+
+           \IDL{TV,image,x,y}\index{tv}\index{Graphics!Images!TV}
+	       \index{Useful Routines!TV}
+
+            Places ``image'' at the device location
+            ``x,y'' ``Device location is ``pixel number'' so if you
+            say 
+
+           \IDL{TV,image,100,100 }\index{tv}\index{Graphics!Images!TV}
+	       \index{Useful Routines!TV}
+
+            then the lower left hand corner of
+            ``image'' will reside on the pixel which is 100 up and 100
+            over from the lower-left hand corner of the window. And
+            the array will be arranged on the window with first row
+            bottom-most.
+
+           TV is very stupid (or trusting, depending on your
+            prespective) so if you try to TV a 500 by 500 element
+            image into a 250 by 250 element window, 3/4 or your image
+            will be off in la-la land.
+        
+            It also does \prbf{nothing} about scaling the image to
+            meet the demands of the graphics environment, so if you TV
+            an integer array into a window expecting bytes, it will
+            simply convert the image ``mod 256''.  One may do true
+            color images in IDL, but by my assumptions, we're only
+            doing 8 bit color, so the window will only be expecting
+            byte arrays. \footnote{ See Section~\ref{sec:qs-24bit-color}
+            for how to do true color images} 
+
+            These considerations mean that one should be careful to
+            \prit{scale} images to the range of one byte, which brings
+            us to our next routine:
+       
+
+         \item \IDLBUILTIN{TVSCL}\index{tvscl}\index{Graphics!Images!TVSCL}
+	       \index{Useful Routines!TVSCL}
+
+            Which scales the image to the range of a byte. Personally
+            I don't every use this routine, I prefer to control the
+            scaling of images myself using the IDL builtin
+            \IDLBUILTIN{bytscl}.
+
+
+       \end{itemize}
+  \end{itemize}
+  \subsection{Hardcopy}\label{sec:qs-hardcopy}\index{Hardcopy}
+
+
+  The two basic species of hardcopy are vector and raster
+  images. Postscript does both, but it's primarily for vector
+  graphics. The other kinds, .gif, .jpg, .png, .tiff \ldots, are all
+  raster images, which may or may not involve compression. Even if you
+  are plotting points on a screen, if you want to write one of these
+  files the last step in the process will involve reading the screen
+  as if it were an image and writing the resulting image out to the
+  files as a bitmap. Whereas, if you just plot directly to the
+  postscript device, the lines maintain all their scaleability.
+
+   \subsubsection{Postscript}\index{postscript output}
+        
+        You can try to master all the keywords to the ``device''
+  proceudure you need in order to do Postscript output. Or you can be
+  smart and use one Dave Fanning's \prtt{psconfig.pro}. (see
+  http://dfanning.com/documents/programs.html\#PSCONFIG) This function
+  creates a GUI which the user can then set all of the variables
+  appropriate to Postscript output and returns a structure suitable
+  for use as a \_extra keyword to the device call. (See
+  Section~\ref{sec:qs-extra-keyword} for how this works exactly) The
+  drill goes:
+
+  \IDL{ps=psconfig()}\index{Useful Routines!psconfig}
+
+   \textit{ A gui opens up, the user sets variables and hits ``ok'',
+   it closes and returns a structure into the variable ``ps''}
+
+   \IDL{set\_plot,'ps'}
+
+   \IDL{device,\_extra=ps}
+
+   Now the postscript device is configured to accept output. You just
+  plot to it as you would to the screen. When you're done, type:
+
+  \IDL{device,/close} ; This closes the file.
+
+   \IDL{set\_plot,'X'} ; to go back to X windows
+
+  
+   \subsubsection{Raster}\index{graphics!Images!Raster}
+
+    In making .gif, .jpg, .png or any other type of raster image, you
+  plot what you want to some screen, usually your normal window, and
+  once you're done you read that screen with the \IDLBUILTIN{tvrd()} builtin
+  function, which returns a bitmap of the screen, which you then write
+  out to the file of your choice. So the drill could look like:
+
+  ;; Plot the data
+
+  \IDL{plot,x,y,title='foo
+  bar',xrange=[x0,x1],yrange=[y0,y1],psym=1,linestyle=-1}
+  \index{plot}\index{Graphics!plot}\index{Useful Routines!plot}
+
+  \IDL{im=tvrd()} ; read the plot from the screen
+  \index{tvrd}\index{Graphics!Images!tvrd}\index{Useful Routines!Graphics!tvrd}
+
+  \IDL{tvlct,r,g,b,/get} ; get the current color table
+  \index{tvlct}\index{Graphics!Images!tvlct}\index{Useful Routines!Graphics!tvlct}
+
+  \IDL{write\_gif, im, 'foobar.gif',r,g,b }
+  \index{write\_gif}\index{Graphics!Images!write\_gif}\index{Useful Routines!Graphics!write\_gif}
+
+  There are complexities if you use a 24 bit image format, like .jpg
+  or .png, but they only have to do with creating the extra planes. We
+  are, by assumption, using 8 bit color, so I'll defer discussion of
+  these matters until I discuss 24 bit color later in
+  Section~\ref{sec:qs-24bit-color}
+
+\section{I/O}\label{sec:qs-I/O}
+  
+  You can't get very far without having to read and write data to
+  files. This section addresses this need. I'm going to break up the
+  section into the various types of files: Text, Flat Binary. There's
+  a third type, HDF files, which is becoming more and more useful, but
+  I'm going to deal that in a different section.
+
+  RSI calls ``text'' data \textit{formatted}, because you can specify
+  how the data is to be formated in the functions which input and
+  output this sort of data. It calls binary data \textit{unformatted}.
+
+
+  In the case of Text and flat file binary I/O, the user opens and
+  reads the file himself, managing the LUNs and all other associated
+  resources. The case of HDF files won't be handled in this quickstart
+  chapter.
+
+  There is no difference between opening and closing text and binary
+  flat files. The only differences are in the reading and writing.
+
+\subsection{Structures}\label{sec:qs-Structures}
+
+  Before I get into reading and writing text and flat binary files, I
+  want to go over how to define structures in IDL. Structures aren't
+  very useful in doing text I/O, but they're fundamental when doing
+  I/O with flat binary files, so it's important to know how to create
+  structures.
+
+  There are two types of structures in IDL, named and anonymous. Named
+  structures may not be changed once defined. Anonymous structures
+  may be changed in the course of one session, but this is, in fact
+  sleight of hand, since you're not so much ``changing'' one anonymous
+  structure as you're ``defining'' a new ``anonymous'' structure.
+
+  The only difference in their definition is whether they're named or
+  not. In either case, one defines a structure by issuing the
+  following sort of command, which may be in a file somewhere; more of
+  this a bit later on.
+
+  \IDL{anon = \{ a: 0, b:0.0, c:fltarr(10), d:strarr(20,20),
+  e:cmplxarr(10) \} }
+
+   If you wanted to make this a named structure, say with the name
+  ``foo'' you'd modify this line to read.
+
+  \IDL{junk = \{ foo, a:0, \ldots \} }
+
+   The variable ``anon'' is necessary since it's the only thing you
+  have in your IDL session which holds the definition of the
+  structure. In the case of the named structure, ``foo,'' you have the
+  name of the structure to refer to, so you don't actually need the
+  variable ``junk.'' That's why I called it ``junk.'' You can create
+  as many instances of ``foo'' as you want with the following syntax.
+
+  \IDL{array\_of\_foos = replicate(\{foo\},20,30)}
+
+   ``array\_of\_foos'' is now a 20 by 30 array of ``foo'' structures.
+
+  It's the \{ foo \} semantics that alert's IDL to the fact that this
+  is a structure creating operation.
+
+   This particular method of creating structures is very useful when
+  combined with another element of IDL's standard operating
+  procedure. Whenever the interpreter sees a reference like this,
+  (e.g. \{ foo \} ) it looks for a definition for structure ``foo'' in
+  the current session. If it doesn't find it, it looks for a file
+  named ``foo\_\_define.pro'' If it finds such a file, it compiles the
+  code in that file, in hopes that it contains the definition for this
+  named structure. This routine should be a procedure that takes no
+  parameters.
+
+  So, here's a way to store structure definitions, put them
+  in files named \textit{foo\_\_define.pro} where ``foo''
+  is the name of the structure.  
+
+  Example:
+
+\begin{alltt}
+pro foo__define
+  junk = { foo, \$
+           a: 0, \$
+           b: 0.0, \$
+           c:fltarr(10), \$
+           d:strarr(20,20), \$
+           e:cmplxarr(10) }
+end
+\end{alltt}
+
+  Notice that the first thing in the structure definition and the
+  thing in front of the two underscores has to be the same (up to
+  case).
+
+  Now, when IDL sees 
+
+  \IDL{a = \{foo\} }
+
+  the first time in any session, it will toddle off, find the file
+  ``foo\_\_define.pro'', compile it and use the definition of the
+  ``foo'' structure to complete the execution of this statement.
+
+  Now that we know how to define a structure we can use them to read
+  and write data.
+
+\subsection{Text and Flat Binary files}
+
+
+  \begin{itemize}
+
+    \item \textit{Open}
+
+    One may open these sorts of files in three ways, to read
+    (\IDLBUILTIN{openr}), to write (\IDLBUILTIN{openw}) and to update
+    \IDLBUILTIN{openu}). The desired method is signalled by calling
+    the appropriate form of ``open,'' to be explained
+    below. Additionally, one may ``append'' when opening either in
+    write or update mode.  All forms of ``open'' require two
+    arguments, and have several very helpful optional
+    keyword/parameters. I'll cover the basics and leave you to learn
+    the rest.
+
+    The two required arguments are the ``logical unit number''
+    (hereinafter LUN) and the ``filename'' Both are scalars, or
+    expressions. The LUN is the logical entity the interpreter uses to
+    keep track of which file you're accessing, it's a Longword in the
+    range of 1 to 128. The filename is a scalar string variable
+    containing, well, \ldots the filename.
+
+    LUNs may be explicitly assigned by the user (LUNs 1 through 99) or
+    requested from the system using either the \IDLBUILTIN{get\_lun}
+    procedure or by using the /get\_lun keyword to whichever ``open''
+    you're calling. If you ask IDL for the lun, rather than defining
+    it yourself, and you should for reasons of good programming style,
+    you have to return the LUN to the interpreter once you're finished
+    with it. To do this, use \IDLBUILTIN{free\_lun, lun1, lun2,
+    \ldots} or use \IDLBUILTIN{close,/all}. Both will do the trick.
+
+    The LUNs which are assigned out of the ``free\_lun'' pool are in
+    the range of 100 to 128, so it's rather easy to run out of them.
+
+    \begin{itemize}
+      \item \textit{openr, lun, filename, \ldots}
+
+	Open to read, error if there is no file by that name.
+
+      \item \textit{openw, lun, filename, \ldots}
+
+	Open for write. If this file exists it is truncated to 0
+        unless the '/append' keyword is used in which case the file
+        pointer is set to the end of the file. If the file doesn't
+        exist, it is created.
+
+      \item \textit{openu, lun, filename, \ldots}
+
+        Open for ``update'', i.e. reading/writing. The file must
+        exist. The filepointer is set to the beginning of the file
+        unless the ``/append'' keyword is used.
+
+    \end{itemize}
+
+
+    \item \textit{Read}
+      \begin{itemize}
+	\item \textit{Text}
+
+	  \IDL{readf, lun, var1 \textit{[,var2 \ldots,varN,
+        format=fmt\_string] } }
+
+	   Usually, each read consumes one line of the input file up
+	   to, but not including, the terminating end-of-line,
+	   whatever that may be\footnote{but see the comment about
+	   reading strings below as there is an exception to this
+	   rule}
+
+	   The variable type of each ``\textit{varN}'' in the list
+	   determines what happens during the read. IDL tries to
+	   convert what it reads to fill each variable in the list
+	   according to the string in ``fmt\_string,'' if one is
+	   present,or according to quite generous default formatting
+	   rules and the variable types of the parameter list if one
+	   isn't.
+
+	   The default rules understand white-space and comma
+	   delimited files, so there's little need for explicit format
+	   strings if this is all you're reading. If you're files have
+	   some other delimiter, then you may need to do more explicit
+	   formatting.	
+
+	   For example, if the file has lines in it that look like:
+
+\begin{alltt}
+1, 2.2, 3, 4.4, 5
+\end{alltt}
+
+           Then I would read this line as:
+
+	   \IDL{a=(c=(e=0))}\\
+	   \IDL{b=(d=0.0)}\\
+           \IDL{readf, lun, a,b,c,d,e}
+
+	   Notice that the first, third and fifth variables are
+	   defined as integers while the second and fourth as
+	   floats. The interpreter uses this information to construct
+	   a default format string so that it knows what to expect.
+
+	    If I'd made ``b'' and ``d'' be integers, IDL would do an
+	   implict conversion of the two floats in the list down to
+	   integers, probably not what we wanted.
+
+	   On the other hand, I could have done this:
+
+           \IDL{rec=``''} ; Make a string\\
+	   \IDL{Readf, lun, rec}
+
+	    Now, rec equals the \textbf{string}
+            ``1, 2.2, 3, 4.4, 5'', which I could split with
+
+	    \IDL{tmp=strsplit(rec, ``,'', /extract)}
+
+	     Now ``tmp'' is the \textbf{string} array
+
+   \[ \begin{array}{c}\\
+        ``1'' \\
+        ``2.2'' \\
+        ``3'' \\
+	``4.4'' \\
+	``5'' \\
+	 \end{array} \]
+
+         And I could pull out the float parts with:
+
+	\IDL{floatparts = float(tmp[[1,3]])} 
+
+	and the integer parts with 
+
+	\IDL{intparts = fix(tmp[[0,2,4]])} 
+
+	But what if I had a whole array of such lines, where the 2nd
+        and 4th columns were floats and the 1st, 3rd and last
+	integers? This is the more common sort of task.
+
+        Well, the first thing to do is, don't panic. At the worst you
+	just loop through, reading each line and  converting as you
+        go. But there's a \textbf{much, much} faster way to read \textbf{any}
+        file that has a fixed and knowable number of rows, each having
+        a fixed number of columns with each column a known variable type.
+
+	Define an array with the proper number of rows and columns of
+        the type that has the most precision, i.e. if the highest
+        precision is ``float'' than make it a float array. Say, the
+        file has 1000 rows with 5 columns, with the same sort of
+        arrangement of variable types as given in the example
+        above. Then just read the whole thing into this one array and
+        pull out and convert the columns as you need to. Like this:
+
+ 	\IDL{openr, lun, file, /get\_lun}\footnote{the
+        /get\_lun tells IDL to allocate a LUN just as if you called
+        the procedure \IDLBUILTIN{get\_lun} }\\
+	\IDL{tmp=fltarr(5,1000)}\\
+	\IDL{readf,lun,tmp}\\
+	\IDL{free\_lun,lun}\\
+	\IDL{a = fix(reform(tmp[0,*]))}\\
+	\IDL{b = reform(tmp[1,*])}\\
+	\IDL{c = fix(reform(tmp[2,*]))}\\
+	\IDL{d = reform(tmp[3,*])}\\
+	\IDL{e = fix(reform(tmp[4,*]))}\\
+
+        Of course it's even easier if the data is all of the same
+        type, then you don't need to do any conversions.
+
+	Some time you should compare this method with looping, it
+        should be about 10 times faster.
+
+	This method won't work so well if one of the fields is a
+        'string', even if it's a fixed length. Without fancy formating
+        string variables are greedy, they consume the
+        rest of the line so that the variables that remain in the
+        parameter list of the ``read'' start consuming fields from the
+        next line.\footnote{this is the one exception I know of the
+	rule that each read consumes one line of the file} Usually I
+	read such files into a string vector having as many entries as
+	rows in the file,then loop through this vector calling
+	\IDLBUILTIN{strsplit(/extract)} on each elements of the
+	vector.
+
+	\item \textit{Binary Flat files}
+
+	The difference in reading binary data is that you use
+        ``readu'' instead of ``readf.''
+
+
+	\IDL{readu, lun, var1 [,var2 \ldots, varN]}
+
+	Here IDL just reads as many bytes as each variable holds, so
+	if ``var1'' is a byte IDL reads the first byte into var1, then
+	increments the file pointer by one. If var2 is a float, it then
+	reads 4 bytes and puts it into var2, \ldots and so on until it
+	reaches the end of the parameter list.
+
+	On the other hand, if ``var1'' is a 512 by 256 lonword array,
+	then IDL reads $512 *256*4$ bytes from the file and puts them
+	into ``var1''
+
+	There is no equivalent to the ``format = fmt\_string''
+	semantics when one is reading binary data, all the information
+	about how much data to read into which variable is in the
+	types of the variables in the parameter list. This is the
+	basis of the the distinction between \textit{formatted}
+	i.e. text and \textit{unformatted} data.
+
+	Matters are much easier if the binary file consists of a
+	series of repeating records. The easiest way to read such
+	files is to define a structure.(see Section ~\ref{sec:qs-Structures})
+
+        Say you have a binary file that had the following record
+        structure.\\
+
+       a 32 character string designator.\\
+       A 32 bit longword representing some sort of time.\\
+       a 512 by 512 float array, containing I know not what.\\
+       A 16 bit flag \\
+       a 512 by 512 bytarr containing an image.\\
+\\
+       And the file has 500 records like this, one after another.
+
+       Define the structure like this.
+
+\begin{alltt}
+pro example__define
+  junk = \{ example, \$
+		desig: bytarr(32), \$
+		time: 0l, \$
+		flt: fltarr(512,512),\$
+		flag: 0, \$
+		image: bytarr(512,512) \$
+	\}
+end
+
+\end{alltt}
+
+      And read the file like this.
+
+\begin{alltt}
+  openr, lun, file, /get_lun
+  data = replicate(\{ example \}, 500)
+  readu, lun, data
+  free_lun, lun
+\end{alltt}
+
+   Now you've slurped all 500 records up into that one array of
+   structures!
+
+   Cool, huh?
+
+      \end{itemize}
+    \item \textit{Write}
+
+	Writing such data is basically the converse operation, just
+	substitute \IDLBUILTIN{printf} for \IDLBUILTIN{readf} in the
+	case of text or \textit{formatted} data. Likewise, substitute
+	\IDLBUILTIN{writeu} for \IDLBUILTIN{readu} when writing binary
+	data. Everything else stays the same, one uses the format
+	string in writing text data, although the default rules work
+	much of the time, and the way that data is laid out in a
+	binary file is completely a function of the dimensionality and
+	type of the variables in the parameter list. In particular,
+        for binary data, the use of structures can make matters very
+        much easier.
+
+  \end{itemize}
+
+  \subsubsection{Endianess}
+
+     There is one caveat with binary data, the matter of
+     endianness. Different hardware store binary data in different
+     ways, with the two rough categories being Big and Little endian.
+     I won't go into the details, do a search on the web if you really
+     want to know about it. The problem arises when one attempts to
+     read data on the one system data which was created on the other
+     type. If you know that this is the case, you have to ``byteswap''
+     multibyte quantities. There are several ways to do it, the
+     procedure \IDLBUILTIN{byteswap}, the function
+     \IDLBUILTIN{swap\_endian}. If you have IDL version 5.3 or higher,
+     you can use one of the keywords to open /SWAP\_ENDIAN,
+     /SWAP\_IF\_BIG\_ENDIAN AND SWAP\_IF\_LITTLE\_ENDIAN. Note that
+     the last two swap the data if the \textbf{machine} is Big or Little
+     endian, respectively, not if the \textbf{data} is. How would IDL
+     know  that?
+
+  \subsubsection{Some Useful I/O routines, particularly for Binary files}
+ 
+    \IDL{ff=fstat(lun)} 
+  
+    Returns a structure containing information about the file, such as
+    it's size, the position of the current file pointer and so on. 
+  
+    \IDL{point\_lun, lun, offset}
+
+    Moves the filepointer in the file on unit number LUN, to the
+    position OFFSET.
+
+    These two routines are particularly useful if you have a binary
+    file with some sort of header on it which you want to skip over. 
+
+
+\subsection{HDF Files}
+
+  I'm not going to cover HDF files in the quickstart guide
+
+
+\section{Useful Routines}\label{sec:qs-Useful-Routines}
+
+  Functions will be indicated by trailing ``()''. Where helpful,
+  argument list will be provided.
+
+  \begin{itemize}
+    \item \IDLBUILTIN{Where(array,n)}\index{where}\label{sec:qs-where}
+    
+    Where returns the indices (as a 1-d longword vector) of the input
+    ``array'' where that array is non-zero. Returns the number of such
+    matches in the second parameter. If there are no matches, it
+    returns ``-1'' as the return value and ``0'' into the second
+    parameter
+
+    It's important to understand what I mean by the parameter
+    ``array'' here. Since Boolean and Relational operations on arrays
+    return arrays of the same size, the ``array'' in the argument list
+    could be, and in fact usually is, the result of one or several of
+    these operations. So, for instance, if you had arrays, all of the
+    same shape, of data, latitude (lat), longitude (lon), and two flag
+    arrays, flag1 and flag2 wanted to find all the data that was
+    between -20 and 20 latitude and 130 to 270 longitude with flag1 eq
+    0 and flag2 having bit 2 set, you would construct a ``where'' test
+    that looked like:
+
+\begin{alltt}\index{where}
+x=where( lat ge -20 and \$
+         lat le 20 and \$
+         lon ge 130 and \$
+         lon le 270 and \$
+         flag1 and (flag2 and 4 ne 0), nx )
+\end{alltt}
+
+     The ``\$'' is a continuation character.
+
+     This will return the indices into ``data'' where these conditions
+    are met.
+
+     Now you can get rid of all the data that you don't want to look
+    at with:
+
+     \IDL{data=data[x]\\
+          lat=lat[x]\\
+          lon=lon[x] } \index{where}
+
+    So here, the ``array'' mentioned in the prototype above is:
+
+    \prbf{ A= (lat ge -20) and (lat le 20) and \$\\
+              (lon ge 130) and (lon le 270) and \$\\ 
+              flag1 and (flag2 and 4 ne 0) }\index{where}
+
+
+  That is, A consists of the ``AND'' of 6 arrays, all of the
+  same dimensionality. The first array is \prbf{lat ge -20}, which has a
+  ``1'' wherever lat is GE -20 and a ``0'' otherwise. That array is
+  ANDed into the second, \prbf{lat le 20} which has a ``1'' where lat
+  is LE 20 and a zero otherwise. The result is an array that has a
+  ``1'' where the latitude is between -20 and 20, inclusive. 
+
+  The reader can see what the next steps in the analysis are. The
+  reason I go to such pains in explaining how this works is because
+  explicit understanding of this process is useful in other
+  circumstances, working with images for instance.
+
+        
+    \item \IDLBUILTIN{n\_elements(item)}\index{n\_elements()}
+
+    Returns the total number of elements in ``item'' Returns ``0'' if
+  ``item'' is undefined. Using n\_elements() is the \prbf{only} way to
+  tell whether a variable is undefined; keep this in mind when you
+  want to test inside a procedure/function for whether an
+  parameter/keyword is defined.
+
+    \item \IDLBUILTIN{size(item)}\index{size()}
+
+        Returns information about the size and shape of the
+  array.  
+
+  The vanilla version of this command returns a longword array
+  describing the contents of the input item. Since I'm assuming that
+  we're using IDL version $>=$ 5.2, I won't go into this in detail,
+  you may look it up in the idl help, if you wish to know.
+
+  This routine has lots of keywords, so you should read and
+  understand the online help. For instance, if you want to know the
+  dimensiosn of a particular array, do:
+
+   \IDL{dim=size(array,/dimension)}
+
+    If ``array'' was a 100, by 200 array, then 
+
+    dim[0] = 100
+
+    and
+    
+    dim[1] = 200.
+
+    \item \IDLBUILTIN{reform(array,d1[,d2, \ldots] )}\index{reform()}
+
+        Reforms the array so that it has the dimensions given in
+    parameters d1, d2, \ldots.
+
+    Clearly there must be some arithmetical relationship between the
+    old shape and the new. So if ``A'' is 24 by 10 you may reform
+    ``A'' into 12 by 20, or 3 by 8 by 10, and so on, but not 100 by
+    1000.
+
+   To change the overal number of elements, use \IDLBUILTIN{rebin} or
+   \IDLBUILTIN{congrid} or possibly \IDLBUILTIN{interpolate} or \IDLBUILTIN{interpol}
+
+
+    \item \IDLBUILTIN{indgen(d1,d2, \ldots)}\index{indgen}
+
+       Creates index arrays where each entry is equal to it's 1-d
+      index.
+
+       See index generators for all the other types (e.g. findgen for
+       floats, dindgen for doubles, lindgen for longs, etc \ldots)
+
+    \item \IDLBUILTIN{byte()/fix()/long()/string() \ldots}\index{Type\_Conversions}
+
+        Converts the argument into the specified type. Can also be
+    used to extract data of the specified type from a byte stream,
+    which in IDL is just a byte array. 
+
+    For instance: if you have a byte array \prbf{B=bytarr(128)} and you
+    want to extract a longword starting at offset 4, you could do 
+
+    \IDL{ll=long(B,4)}
+
+        See all other type conversion routines
+
+    \item \IDLBUILTIN{replicate(datum, d1, d2, \ldots)}\index{replicate}
+
+        Creates the array of the specified dimensions having the type
+    of ``datum''
+
+    \IDL{A=replicate(1,2,3)}\\
+     will create a 2 by 3 short integer array filled with ``1''.
+
+    \IDL{A=replicate(complex(2,3),3,4,5,6,7)}\\
+     will create a single-precision complex array of dimensions 3 by 4
+    by 5 by 6 by 7 filled with the number 2 + 3i
+
+
+    \item \IDLBUILTIN{n\_params()}\index{n\_params()}
+
+      Returns the number of paramenters that have been passed to the
+    current routine. For instance, if you have the following procedure
+    which absolutely required it's three parameters, you could do the
+    following.
+
+\begin{alltt}
+\prbf{PRO foo, a,b,c}
+  IF n_params() lt 3 THEN BEGIN
+    Message,'Usage:  foo, a,b,c',/cont
+    return
+  ENDIF 
+\end{alltt}
+
+    \item \IDLBUILTIN{keyword\_set(keyword)}
+
+      Equals ``1'' if this ``keyword'' has been set to a non-zero
+  number in this call to this routine. Note the ambiguity between a
+  keyword being set to ``0'' and not being set at all. In \prbf{both}
+  of these cases, keyword\_set will return ``0.'' If you want to
+  tell the difference between these two cases, you should use
+  ``n\_elements().''
+
+      In short, this function is only useful for those keywords that
+      serve a Boolean function or those which always pass non-zero
+      values, but not otherwise.
+
+      For example, in the following call:
+
+        \IDL{foo, a,b,k1=0} for a function whose definition is:
+
+\begin{alltt}
+  \prbf{PRO foo, a,b,c,k1=k1,k2=k2}
+   \ldots
+\end{alltt}
+
+        
+     Then both keyword\_set(k1) \prbf{and} keyword\_set(k2) would
+      equal 0!, k1 because it is explicitly set to ``0'', and k2
+      because it isn't set at all!
+
+    \item \IDLBUILTIN{arg\_present(item)}
+
+      Equals ``1'' if this item is present as a return argument in the
+      parameter/keyword list. This means the item is an IDL variable,
+      not a constant or an expression. 
+
+      For example, if the following call were made to the procedure
+      ``foo'' given above:
+
+      \IDL{foo, a,b,4,k1=k1,k2=a[0:10]}
+
+      Then arg\_present(a), arg\_present(b) and arg\_present(k1) would
+      be ``1'', but the others would be 0: ``c'' (the ``4'' in our
+      example) because it's a constant; ``k2'' because it's an
+      expression, in particular a subarray of the array ``a''.
+
+      The way to remember how arg\_present() works is to recall that the
+      thing arg\_present() is operating on must be something that a
+      value can be stored into, which means it must have been passed
+      by ``reference'' and not ``value.'' Constants and expressions
+      are passed by value.
+
+    \item \IDLBUILTIN{lodact} Loads a color table. There are 41 default
+           color tables. One loads them by refering to their
+           number. The default is to fill the entire color space
+           with the requested table, unless you modify it by including
+           the ``bottom'' and ``ncolors'' keywords.
+  \end{itemize}
+
+
+\section{Good programming}\label{sec:qs-good-programming}
+
+\begin{itemize}
+  \item \textit{Don't Loop!}
+
+   This is the single most important lesson to learn. Take the five
+  minutes to figure out how to get rid of the inner most loop. Read
+  the help files, think about using ``reform'' or ``replicate'' or the
+  matrix multiplies \# or \#\#. Try to think about the implied loop
+  that is in the interpreter. And remember, sometimes you temporarily
+  have to use more memory to avoid a loop, but it's worth it in the
+  end.
+
+  And for goodness sake, learn how to go back and forth between multi
+  dimensional indexing and 1-d indexing.  For A, a 2-d IDL array of M columns
+  and N rows:
+
+  A[i,j] = A[j*M+i]\footnote{Remember, the column index moves the
+  fastest}
+
+  Or, conversely, if K is some 1-d index into A, the corresponding 2-d
+  indices are:
+
+  A[k mod M, long(k/M)] 
+
+  
+  This sort of calculation can be extended to any number of dimensions
+  and will allow you to, for instance, take a \prbf{where} vector
+  that only indexs the last two dimensions of a 3-d array and
+  construct another that will index all three.\footnote{That's the
+  ``sometimes you have to use more  memory to avoid a loop'' part I
+  mentioned above}
+
+
+   If you must loop, loop over the smallest dimension and reform the
+   arrays so that this dimension is last in the array. That way, the
+   expressions you form will be in memory order!
+
+   That is, if your array is M by N by L and your loop is in the ``L''
+   dimension, then every subarray you from will consist of M*N
+   contiquous memory locations, which means that fetching and
+   restoring it will be much faster!
+
+  \item \textit{Get rid of old variables}
+
+    Free up memory, be a good neighbor. When done with an array set
+  it equal to zero! This will free the memory that variable
+  uses.\footnote{For the most part}
+
+
+  \item \textit{Use Procedures/Functions}
+
+        These localize variables, which is good for the environment,
+  they make control of the process much easier and allow for the use
+  of IDL error handling. They allow for easy debugging, since you can
+   use the IDL builtin \IDLBUILTIN{breakpoint} particularly inconjunction
+   with the two most prevalent development environments, RSI's IDLDE
+   and emacs/idlwave-mode.
+
+  \item \textit{Modularize}
+
+   Don't write huge routines. Break them up. This is just plain old
+   good programming sense.
+
+  \item \textit{Don't Loop!}
+  \item \textit{Don't Loop!}
+  \item \textit{Don't Loop!}
+
+
+\end{itemize}
+
+\section{Error Handling}\label{sec:qs-error-handling}
+  
+  It doesn't take too long before you start thinking about writing
+  more complicated programs, some of which may have calling stacks
+  that run to the dozens (if not hundreds) of routines. And when that
+  happens, a programmer's fond thoughts turn to error handling. These
+  are the basic routines RSI provides for controling the response of a
+  program unit to errors.
+
+  I'll give a quick overview here even though this is a ``quickstart''
+  guide, because being aware of how error handling works in the very
+  beginning will make it's incorporation easier further on down the
+  road.
+
+  For the full story on IDL's error control mechanism, open up IDL's
+  online help file, and read the help for the builtin routine
+  ON\_Error. At the bottom, in the ``See Also'' section click on
+  ``Controlling Errors.'' This is RSIs  overview of error handling. 
+
+  Basically there are three types of errors: math, input/output and
+  all others. In certain circumstances, the latter two types are
+  treated by the same mechanism, namely ``catch,'', but math errors
+  are their own category. These include divide-by-zero,
+  under/overflow, all the standard stuff. Since IDL supports NANs and
+  INF, divide by zero is not a fatal error, i.e. it won't stop your
+  program from running. All that happens is that that elements of the
+  array or that scalar is set to the appropriate NAN/INF value and an
+  warning message is printed. 
+
+  But these math erros will muck up plotting and such, since the
+  presence of a NAN or INF in the data stream will derail IDL's
+  attempt to, for instance, figure out the device coordinates of the
+  axes to be used in plotting the data.
+
+  So you do have to exercise some care around math errors if there's
+  a chance that the operation might produce NANs or INFs and there are
+  two routines you can use to do this.
+
+  \begin{itemize}
+     \item \textit{Finite()}
+
+        Finite returns True of the argument is neither a NAN or an
+        INF. It returns an array of the same shape as the input, so
+        you can very naturally combine its operation with
+        \textbf{where}, like this:
+
+        \IDL{good=where(finite(foo),ngood)}
+
+        Which returns a vector pointing to all the real numbers in
+        the foo array.
+
+      \item \textit{Check\_Math()}
+
+        Check\_Math() returns a bit pattern as input which tells what
+        sort of math error has occured. It also clears the error. 
+ 
+        So if you're in some part of your routine and you want to
+        check whether a math error has occured, you can do something
+        like:
+
+
+\begin{alltt}
+  t=check_math()
+  IF t NE 0 THEN BEGIN 
+     \textit{do something about the math error!}
+  ENDIF 
+\end{alltt}
+
+        See the online help on this builtin function for the full story.
+   \end{itemize}
+
+  
+
+  \begin{itemize}
+    \item \textit{On\_IOError}
+
+    I believe On\_IOError was the first IDL error handling routine,
+    but it may be the case that both it and ON\_Error arrived at the
+    same time. 
+
+    I/O errors occur when you try to read past the end of file, or you
+    are reading formatted data and the format doesn't work right.
+
+    In any case, on\_IOError takes a label as it's argument. If an
+    I/O error occurs, control is passed to the statement directly
+    after the label. So, a possible use for this might be:
+
+
+\begin{alltt}
+pro foo,filename,data
+
+on_ioerror, badio
+openr, lun, filename, /get_lun
+data=fltarr(100)
+readf,lun,tmp
+free_lun,lun
+goto, good_io
+
+badio:
+free_lun, lun
+print,'Error reading data!'
+
+good_io:
+end
+  
+\end{alltt}
+
+
+    If anything bad happens while reading the file, control will skip
+    to the line after the label ``badio.'' The lun will be freed,
+    which closes the file, a message will be printed out and the
+    routine will exit.
+
+    If nothing bad happens, execution will proceed up to the ``goto''
+    statement, which will then skip over the error message and proceed
+    to the end of the routine.
+
+    It's a pretty low-tech method of error control but you need to
+    know about it because on\_ioerror takes precedence to any error
+    handler set using ``catch.'' However, I suggest you learn how to
+    use ``Catch'' since it's the more general method.
+
+    \item \textit{On\_Error}
+
+    On\_error takes a numerical argument, a switch, which tells it
+    what to do if a non-math/non-ioerror occurs. Such errors include
+    making reference to an undefined variable, dereferencing a null
+    pointer, calling methods on a null object, attempting array
+    operations with a scalar or scalar operations with an array \ldots 
+
+    The meaning of the various values are:
+
+    \begin{itemize}
+      \item \textsl{0}: Stop at the statement in the procedure 
+               that caused the error. This is the default action.
+
+
+
+      \item \textsl{1}: Return all the way back to the main program level.
+
+
+      \item \textsl{2}: Return to the caller of the program unit 
+              that established the ON\_ERROR condition.
+
+
+      \item \textsl{3}: Return to the program unit
+                that established the ON\_ERROR condition.
+    \end{itemize}
+      
+     What does this all mean, you ask?
+
+     Well, say you have a routine \prtt{foo} that sets an ON\_Error
+  condition. Then it calls \prtt{bar} which calls \prtt{baz}, in which
+  an error occurs.
+
+  If you said 
+
+    On\_Error,0
+
+    The routine would stop on the statement that caused the error in
+  ``baz''
+
+   If you said 
+
+   On\_error, 1
+
+   It would exit all the way out to the main level, i.e. all the way
+   out of ``foo.''
+
+   If you said:
+
+   On\_error,2 
+
+   ``baz'' would return to the line in ``bar'' that called ``baz.''
+
+  and finally, if you said:
+
+   On\_error,3
+
+  Then ``baz'' would return all the way to the line in ``foo'' which
+  called ``bar.''
+
+
+  
+    \item \textit{Catch/Message}
+
+     This is the most sophisticated manner of error handling. It works
+    with all errors which the system generates, plus it allows for the
+    user to ``throw'' an error too, using the IDL builtin
+  \IDLBUILTIN{message}.
+
+  Here's how it works.
+
+  Near the beginning of a routine, put the following.
+
+
+\begin{alltt}
+catch, error                      ; 1
+IF error NE 0 THEN BEGIN          ; 2
+  catch,/cancel                   ; 3
+  message,!error_state.msg,/cont  ; 4
+ENDIF                             ; 5
+\end{alltt}
+
+ When you put this sort of code in a routine you are ``declaring'' an
+ error handler to IDL which superceeds whatever other error handling
+ mechanisms are in place that were declared by ON\_Error. 
+
+ The interaction of this mechanism with ON\_IOError is a bit more
+ complicated, and I'll leave that for a bit later in the exposition.
+
+ The ``catch,/cancel'' is optional, but it's a good idea to use it to
+ prevent infinite error loops caused by errors thrown while in the
+ midst of the error handling code. Oh, and you can leave off the
+ numbers, they're just for purposes of exposition.
+
+  Now when the IDL interpreter detects a ``catch''able error execution
+ immediately jumps to the ``catch,error'' line and proceeds from
+ there. So it enters the block at ``2'', cancels the error handler at
+ ``3'' and issues a message at ``4.'' What it does after that is
+ limited only by your imagination, but usually in this sort of
+ circumstance one just exits the routine, so usually there's a
+ ``return'' there (or ``return, value'' in the case of a function) The
+ code as it's written would continue to whatever line followed the
+ call to ``message.''
+
+  Now the error the IDL interpreter ``catches'' can be one it detected,
+ e.g. an attempt to  reference an undefined variable, or it can be one the
+ user ``creates'' by calling the builtin procedure ``message.'' When
+ the user calls ``message'' with no qualifying keywords, an error
+ condition is raised which, if an error handler had been declared with
+ ``catch'' as I showed above, will trigger this catch behavior. So a
+ user can, in effect, define his own errors by simply calling
+ ``message.''
+
+  You can also circumvent the ``catch'' mechanism by using the
+ ``/info'' keyword, which does not raise an error, or the
+ ``/continue'' keyword which raises an error but does not jump to the
+ error handler.
+
+  Additionally, whatever string is passed to message is copied into the
+ ``msg'' field of the system variable !error\_state.  You can also set
+ Message so that it doesn't emit the message at the first call, but
+ rather at the call within the error handler.
+
+  So a standard processing scenario that I run into all the time would
+ be something like this.
+
+
+\begin{alltt}
+catch, error                      
+IF error NE 0 THEN BEGIN          
+  catch,/cancel                   
+  message,!error_state.msg,/cont
+  return
+ENDIF   
+
+\prit{some lines of code}
+
+\prit{some more lines of code}
+
+\prit{yet more lines of code}
+
+\prit{Read some data, but have some kind of failure}
+
+Message,\prbf{''Can't read data, run away!''},/noprint,/noprefix,/noname
+
+                          
+\end{alltt}
+
+
+  Now the routine runs until it hit's the second
+ message\footnote{which in terms of execution steps is the first} but
+ it doesn't print out the message because of the ``/noprint''
+ keyword. Then execution jumps to the error handler at the top,
+  i.e. to the ``catch,error'' line, whereupon proceeding from there it
+  executes the message within the error handler code\footnote{which is
+  the second call to message, in terms of execution order} and the
+  message ``Can;t read data, run away!'' is printed out because the
+ first call to message inserted that string into the system variable !error\_state.
+
+  BTW, if you want to know what's in this system variable, do:
+
+  \IDL{help,!error\_state,/struct}
+
+  Now the crucial thing to keep in mind about the ON\_Error/catch
+ forms of error handling is that their influence extends beyond the
+ routine in which the error handling is defined or declared. If you
+ set an error handler using ``catch'' in routine A and it calls
+ routine B, which does \prbf{not} set any error handler, and an error
+ occurs, execution will jump to the ``catch'' in routine A! On the
+ other hand, if you declare ON\_Error in routine A which, just like
+ the previous example, calls routine B which has no error handling,
+ then whatever condition you set with the call in routine A is the
+ error handling default when the error occurs in B. This is because
+ the interpreter searchs up the call stack from where the error occurs
+  to the first instance of *any* kind of error handler.
+
+  If you chose to user the catch style error handling, you pretty much
+  have to resign yourself to using it in whatever routine your routine
+  calls, or be aware of the fact that errors in the one can cause your
+  routine to suddenly jump to another, which preceeded it on the call
+  stack.
+
+   \end{itemize}
+\section{Some Tricks}\label{sec:qs-tricks}
+
+\begin{itemize}
+
+  \item \textit{Make Lat/Lon grid arrays}
+
+\begin{alltt}
+  lon=findgen(360)#replicate(1.,181)
+  lat=replicate(1.,360)#(findgen(181)-90)
+\end{alltt}
+
+  \item \textit{Getting the same number of colors all the time}
+  
+   When using the X windows system:
+
+   Your graphics environment is fixed the first time you connect to
+  the X server. A connection is made when you open a window, but it's
+  also made as the result of certain system calls; device,/help or
+  device,get\_visual\_name, for example.
+
+  So, if you always want to be sure you get the same number of colors
+  in your graphics environment, you should put some code in your
+  IDL\_STARTUP file that makes the first connection to the X server
+  for you and arranges things nicely. Personally, I'd do:
+
+\begin{alltt}
+  device,pseudo=8
+  window,/pixmap,/free,xsize=10,ysize=10,colors=256
+  wdelete,!d.window
+\end{alltt}
+
+  as the first several lines in my IDL\_STARTUP file.
+  
+
+  \item \textit{The \_extra keyword}\label{sec:qs-extra-keyword}
+
+   Each IDL builtin routine, and many well designed routines in the
+  source language, have a keyword called ``\_extra.'' When you call an
+  IDL builtin (or one of these other  well constructed routines) IDL
+  looks at the keyword list in the procedure definition and the list
+  of keywords you've passed in your call of it. If there are some
+  keywords not in the definition of this routine but there is an
+  \prbf{\_extra} then IDL packages up a structure whose tag names are
+  these extraneous keywords and whose values are whatever you've
+  passed by means of them.
+
+  For instance, if you have a routine defined thusly.
+
+  
+\begin{alltt}
+
+\textbf{PRO foo, a,b,c,k1=k1k2=k2,k3=k3,_extra=_extra}
+
+   Some code here 
+
+\textbf{END}
+
+\end{alltt}
+
+  And you call it as 
+
+  \IDL{foo, a,b,/k1,/overplot,xmargin=[2,2],xrange=[3,5]}
+
+  Then, upon entry to this routine the \_extra keyword will the value
+
+\begin{verbatim}
+help,_extra,/struct
+** Structure <1006f608>, 3 tags, length=10, refs=1:
+   OVERPLOT        INT              1
+   XMARGIN         INT       Array[2]
+   XRANGE          INT       Array[2]
+\end{verbatim}
+
+
+  This works only when the author of the code has declared a \_extra
+  keyword in the pro/function definition line, that first line in the
+  source code .pro file. If this keyword is not declared, using
+  undefined keywords results in a run time error.
+
+  This mechanism allows the user to pass arbitrary keywords to IDL
+  builtins, very frequently graphics routines, without having to code
+  lots of logic for default cases where the keywords are or are not
+  present. For instance, you can write a wrapper to a \IDLBUILTIN{plot}
+  command which hardcodes certain default and then allow the user to
+  vary the others via the keywords contained in the \_extra keyword.
+
+  
+
+  \item \textit{Histograming}
+
+  Aside from the \prbf{where} function, it seems that the histogram
+  function is just about the most useful utility there is in
+  IDL. That's because it relates a value to a position in another
+  array, so you can turn statements about values into statements about
+  array indices.  This is particularly true because of the
+  \prbf{REVERSE\_INDICES} keyword, which returns the indices in the
+  original array which fall into a particular bin.
+
+
+  For some clever examples of the use of histogram, see the following  Usenet
+  news articles:
+
+  For a way of finding intersections between arrays:\footnote{I've had
+  to escape some of the newlines, to wrap these exceedingly long URL lines
+  sensibly. You'll have to take out the newlines if you wish to use
+  this URL}
+
+  \begin{alltt}
+http://groups.google.com/groups?q=histogram&start=20&hl=en&\BS
+lr=&group=comp.lang.idl-pvwave&safe=off&rnum=23&ic=1&\BS
+selm=38CBF8B6.5BF0AB50%40astro.cornell.edu
+\end{alltt}
+
+  And see:
+
+  \begin{alltt}
+http://groups.google.com/groups?q=histogram&start=20&hl=en&lr=&\BS
+group=comp.lang.idl-pvwave&safe=off&rnum=26&ic=1&\BS
+selm=7hrg4i%24lhs%241%40news.lth.se
+  \end{alltt}
+
+  for a clever way of setting to some constant a range of values
+  inside an arbitrary array.
+
+  For a way to repeatedly add a constant to an array location, even if
+  the array location appears more than once in a vector, see:
+
+  \begin{alltt}
+http://groups.google.com/groups?q=histogram&start=40&\BS
+hl=en&lr=&group=comp.lang.idl-pvwave&safe=off&rnum=43&\BS
+ic=1&selm=7mkuql%24itm%241%40nnrp1.deja.com
+\end{alltt}
+
+  To both demonstrate the usefulness of the histogram function and to
+  show the effect on effeciency of just a little work, I'm going to
+  work out an extended example. I'm going to incrementally improve on
+  something we all do quite often, average some quantity into lat/lon
+  bins.
+
+  Histogramming can be a quick easy way to do this sort of averaging,
+  particularly in a 2-d lat/lon grid if you're looping over many revs
+  of data. Lets assume that the data has an inherent
+  quantization of 0.1 (whatevers), which is frequently the case in our
+  work, and you're only interested in it in some particular range of
+  the data, for this example, 0 to 10. You have a thousand revs of
+  data you want to get an average into a 1 by 1 degree lat/long. 
+
+  The first, very naive Fortran/C like approach would be to do the
+  following, which is \prbf{excruciatingly slow}.
+
+\begin{alltt}
+
+sum=(sumsqr=dblarr(360,181))
+num=lonarr(360,181)
+eps=some_small_positive_number;
+
+For f=0,n_elements(files)-1 do begin 
+  data=read_file(files[f], lat, lon)
+  ; lat/lon are the locations of the data.
+  lat=round(lat+90)
+  lon=round(lon)
+  for i=0,359 do begin 
+    for j=0,181 do begin 
+        for k=0l,n_elements(lon)-1 do begin 
+          if lon[i] eq i and lat[i] eq j-90 then begin 
+             sum[i,j] = sum[i,j] + data[k]
+             sumsqr[i,j] = sumsqr[i,j] + data[k]*data[k]
+              num[i,j] = num[i,j] + 1
+          endif   
+      endfor
+    endfor 
+  endfor 
+endfor
+
+for i=0,359 do begin
+  for j=0,181 do begin 
+    if num[i,j] ne 0 then begin 
+      sum[i,j] = sum[i,j]/num[i,j]
+      if num[i,j] gt 1 then begin 
+        sumsqr[i,j] = sqrt(\$
+            (sumsqr[i,j]-num[i,j]*sum[i,j]^2)/(num[i,j]-1))
+      endif else begin 
+        sumsqr[i,j]=0
+      endelse 
+  endfor
+endfor
+; sum is now the mean, sumsqr is the standard deviation.
+
+\end{alltt}
+
+  This is just Fortran or C written in IDL, and it's complete
+  junk. The interior loop over ``k'' and the last two loops are
+  \prbf{completely} extraneous. This code will probably take longer
+  than the lifespan of the universe to run.
+
+  Marginally better, in that it removes those two offending loops,
+  is:
+
+\begin{alltt}
+
+sum=(sumsqr=dblarr(360,181))
+num=lonarr(360,181)
+eps=some_small_positive_number;
+
+For f=0,n_elements(files)-1 do begin 
+  data=read_file(files[f], lat, lon)
+  ; lat/lon are the locations of the data.
+  lat=fix(lat+90)
+  lon=fix(lon)
+  for i=0,359 do begin 
+    for j=0,181 do begin 
+        x=where(lon eq i and lat eq j,nx)
+        if nx ne 0 then begin 
+          sum[i,j] = total(data[x])
+          sumsqr[i,j] = total(data[x]^2)
+          num[i,j] = nx
+      endif 
+    endfor 
+  endfor 
+endfor
+
+x=where(num,nx)
+sum[x]=sum[x]/num[x] ; sum is now the mean
+sumsqr[x] = sqrt(\$
+     (sumsqr[x] - num[x]*sum[x]^2)/( (num[x]-1)>1) > eps)
+
+; sum is the mean, sumsqr is the standard deviation.
+
+\end{alltt}
+
+
+  This does precisely what is needed but for each rev of data it makes
+  360*181 calls to \IDLBUILTIN{where}, which looks through the entire data
+  array for lat/lons in the current lat/lon bin. For a rev of
+  QuikSCAT data, that's something like:
+
+  360*181*1400*76 = 6933024000 comparisons.
+
+  But what are we really doing? Normally one thinks of averaging as
+  taking a sum and dividing it by the number added into the sum, but
+  you can also think of it as keeping track of how many times you see
+  a value in a particular bin -- which is just a histogram -- summing
+  over the product of the histogram with the value of each bin and
+  dividing by the total number of points. This only really works if
+  the data has some level of quantization in it, but since almost all
+  data is digital nowadays, that's always true.
+
+  So what we're really doing here could be viewed as a 3d histogram,
+  with the bins in lat, lon and data.
+
+  So, one could do the following which is not only much more elegant,
+  it's somewhat faster.
+
+
+\begin{alltt}
+hist=0   
+eps=some_small_positive_number;
+For f=0,n_elements(files)-1 do begin 
+  data=read_file(files[f],lon,lat)
+  hist = hist + hist_3d(lon,min1=0,max1=359,bin1=1,\$
+                        lat,min2=-90,max2=90,bin2=1,\$
+                        data,min3=0,max3=10,bin3=0.1,\$
+                        )
+endfor
+        
+   ; hist is going to be a 360 by 181 by 101 array
+
+xx=findgen(101))*0.1 
+nn=total(hist,3) ; The number in each lat/lon bin.
+results=1.0d*hist[*,*,0:1]
+for i=0,359 do begin 
+  for j=0,180 do begin 
+    results[i,j,0] = total(hist[i,j,*]*xx)/(nn>1) 
+    results[i,j,1] = \$
+      sqrt( \$
+       total( \$
+        (hist[i,j,*]*xx)^2 - nn*results[i,j,0]^2)/( (nn-1)>1) > eps)
+  endfor
+endfor 
+hist=0; be a good neighbor!
+\end{alltt}
+
+  But one still has to loop nlon*nlat iterations, so we've eliminated
+  the repeated calls to \prbf{where} by doing it this way.
+
+
+  But the fastest, most elegant solution to this problem is to go
+  back to a 2d histogram, since all we \prbf{really} need to know is
+  how many data points fall into each lat/lon bin and where they are
+  in the input data array. But that is \prbf{precisely} what the
+  \prit{REVERSE\_INDICES} keyword gets us. So in the following
+  snippet, the algorith is that we accumulate the sum, sumsqr and
+  num in each lat/lon bins and accumulate till the
+  end and calculate the mean/stdev then. This is a combination of
+  methods 1 (or 2) and my histogram method above. 
+
+  With some minor mods, this algorithm comes from:
+
+  \begin{alltt}
+http://groups.google.com/groups?q=histogram&start=40&hl=en&lr=&\BS
+group=comp.lang.idl-pvwave&safe=off&rnum=50&ic=1&\BS
+selm=onsnmrhvp2.fsf%40cow.physics.wisc.edu
+  \end{alltt}
+
+
+\begin{alltt}
+hist=0   
+eps=some_small_positive_number;
+sum = (sumsqr = dblarr(360,181))
+num=long(sum)
+
+For f=0,n_elements(files)-1 do begin 
+  data=read_file(files[f],lon,lat)
+  junk = hist_2d(lon,min1=0,max1=359,bin1=1,\$
+                 lat,min2=-90,max2=90,bin2=1,\$
+                 reverse_indices=ri )
+  \prit{; We don't need junk, it's just the number of points}\\
+  \prit{;that fall into this lat/lon bin}\\
+  \prit{;We \prbf{really} need is the reverse index, ri}\\
+
+  junk=0; be a good neighbor
+
+  for i=0l,n_elements(hist)-1 do begin 
+    if ri[i] ne ri[i+1] then begin 
+        sum[i] = sum[i] + total(data[ri[ri[i]:ri[i+1]-1]])
+        sumsqr[i] = sumsqr[i] + total(data[ri[ri[i]:ri[i+1]-1]]^2)
+        num[i] = num[i] + n_elements(data[ri[ri[i]:ri[i+1]-1]]))
+    endif   
+  endfor 
+endfor     
+mean=sum/(num>1)
+stdev=sqrt( ( (sumsqr-num*mean^2)/( (num-1)>1)) > 0)
+sum=(sumsqr=(num=0))
+  
+\end{alltt}
+
+  This could be speeded up still further by only looping over those
+  bins, ``i''  for which ri[i+1] ne ri[i], as in:
+
+
+\begin{alltt}
+hist=0   
+eps=some_small_positive_number;
+sum = (sumsqr = dblarr(360,181))
+num=long(sum)
+
+For f=0,n_elements(files)-1 do begin 
+  data=read_file(files[f],lon,lat)
+  \prit{; We don't need junk, it's just the number of points}
+  \prit{;that fall into this lat/lon bin}
+  \prit{;We \prbf{really} need is the reverse index, ri}
+
+  nn=n_elements(junk)
+  junk=0; be a good neighbor
+
+  diff=ri[1:nn-1]-ri;
+  x=where(diff,nx)
+
+  \prit{;each j where diff[j] > 0 means that}\\
+  \prit{;ri[i+1] ne ri[i], i.e. that}\\
+  \prit{;there are values in that lat/lon bin}\\
+  \prit{;So now we only loop over those!} 
+
+  if nx ne 0 then begin 
+
+    for i=0l,nx-1 do begin 
+      jj=x[i]
+      i0=ri[jj]
+      i1=ri[jj+1]-1
+      dd=data[ri[i0:i1]]
+      nn=n_elements(dd)
+      sum[i] = sum[i] + total(dd)
+      sumsqr[i] = sumsqr[i] + total(dd^2)
+      num[i] = num[i] + nn
+    endfor 
+  endif     
+endfor 
+mean=sum/(num>1)
+stdev=sqrt( ( (sumsqr-num*mean^2)/( (num-1)>1)) > eps)
+sum=(sumsqr=(num=0))
+  
+\end{alltt}
+
+Depending on how sparse your coverage is, this may produce a
+considerable increase in effeciency.
+
+I ran a timing test on these algorithms, here's what I got.\\
+
+
+
+
+
+    \begin{center}
+%     \begin{table}\label{tab:histogram-times}
+     \begin{tabular}{||c|c||}\hline\hline
+    Thinly disguised Fortran &      $>$ 964 Minutes (killed before finishing!)\\
+    Many calls to ``where'' &      13.4833 Minutes \\
+    My 3d histogram   &       11.9000 Minutes \\
+    2d histo (reverse\_indices), v. 1 &      0.850000 Minutes \\
+    2d histo (reverse\_indices), v. 2 &      0.833333 Minutes \\
+    \hline\hline
+    \end{tabular}
+%   \end{table}
+    \end{center}     
+
+
+  A you can clearly see, the ersatz Fortran is horribly slow. Even the
+  version using the many calls to the where function is 68 times faster.
+
+
+  \item \textit{24 bit images}\label{sec:qs-24bit-images}
+
+   If you're going to write .jpgs or .pngs, it makes sense to learn a
+  little about 24 bit color. 
+
+  When you plot in 8 bit color, the number you specify is not the
+  color, it's the index into a 256 color colortable. When you tell the
+  graphics system to plot something with a certain color, specified as
+  a number between 0 and 255, IDL looks up this index in the
+  Red/Green/Blue components of the color table and stirs the colors
+  together in the given proportions.\footnote{Not \prbf{exactly} how
+  it's done, but close enough for our purposes} It's this color
+  table you load when you make calls to the various colortable loading
+  and manipulation routines. 
+
+  So, say you've done what I've told you to do in your IDL\_STARTUP
+  file, so everytime you start IDL you have 256 colors in any graphics
+  window you open. Then you load colortable 39 (Rainbow + white) and
+  you issue the following command:
+
+  \IDL{plot,indgen(10),color=100}
+
+  What color will the plot be?
+
+  It'll be an aqua, because the color triple in that location is 
+  Red: 0,  Green: 246 and   Blue: 255.\footnote{Go ahead and try if
+  for yourself and see}
+
+  This type of color is called the ``indexed'' color, because the
+  number you specify is the index into the color table. 
+
+  So how do you get 24 bit color? Well, that depends on whether you're
+  doing vector graphics or images.
+
+  \begin{itemize}
+
+  \item \prbf{Vector Graphics} 
+
+  When plotting vector graphics, i.e. anything using \IDLBUILTIN{plot} and
+  related routines, you eliminate the index and use ``color='' to pass
+  the color itself. There are 3 eight bit quantities, or 24 bits, and
+  you have to put together this number yourself. The least significant
+  8 bits is the Red value, the next is the Green and the most
+  significant 8 bits is the Blue.
+
+  So, to make the same plot as above, but in 24 bits, you'd do the
+  following.
+
+  \IDL{color = (0ul OR \$\\
+               ishft(246ul,8) OR \$\\
+               ishft(255ul,16))}\footnote{note the use of the 'ul'
+  here. It's important. Also, ishft() is the bit shifting operator,
+  just like $<$$<$  and $>$$>$ in C.}
+
+  \IDL{plot,indgen(10),color=color}
+
+  If you knew the hex values for each of these numbers, you can
+  construct the number yourself. 255 = 'ff'x and 246 =
+  'f6'x\footnote{This is how to specify hex numbers in IDL}. So the
+  command could be rewritten as:
+
+   \IDL{plot,indgen(10),color='fff600'xl}
+
+   \IDL{plot,indgen(10),color'00ff00'xl} will plot a pure green.
+
+   \IDL{plot,indgen(10),color'ff00ff'xl} is bright yellow.
+
+     By the way, the thing you pass through the color keyword can be a
+  vector too, so long as it has as many elements as the ``Y'' you're
+  plotting.
+
+
+  \item \prbf{Images}
+
+   When your graphics system is set to 8 bit pseudo color\footnote{by
+  a call to device,pseudocolor=8} and you issue the command:
+
+  \IDL{tv,image}
+
+   The numbers in the image are interpreted as indices into the color
+   table in a manner entirely analogous to the meaning of the value
+   passed via the ``color='' mechanism discussed above.
+
+    
+   To create hard copy 8 bit output, you must pass the image \prbf{and
+  the color table} to whatever routine creates the
+  output. \footnote{or it will default to some color table related to
+  your's only by chance}
+
+  When doing 24 bit images you don't need to give the color table,
+  because you're specifying the colors directly. You do, however, have
+  to give all three colors for each pixel, which immediately makes
+  working in 24 bit color images 3 times more expensive
+  computaionally.
+
+  So, what if you want to work in 8 bit color, and then at the last
+  step make a 24 bit image and write it out?
+
+  Nothing simpler, you just use the color table to create the three
+  color planes, the red, green and blue planes. 
+
+  Let's say you've done some graphics work and created the image
+  named, appropriately enough ``image.'' Now you want to write it out
+  as a true-color jpg file. Here's how you do it.
+
+\begin{alltt}
+lodact, n ; where N is the number for some color table
+tvlct, r,g,b,/get  ; retreive the color table
+dim=size(image,/dimension ; get the dimensions
+final_im = bytarr( dim[0], dim[1], 3 ) ;Create final array
+
+;; Now load each of the color planes
+
+final_im[*,*,0] = r[image]; the red component
+final_im[*,*,1] = g[image]; the green  component
+final_im[*,*,2] = b[image]; the blue component
+
+image=0; be a good neighbor.
+
+;;Write the image out as a JPG.
+
+write_jpeg, 'foo.jpg', final_im, quality=75, true=3.
+\end{alltt}
+
+   The last keyword (true=3) tells which dimension is interleaved,
+  just think of it as telling which dimension has the ``3'' in it.
+
+   \end{itemize} 
+
+
+
+
+
+
+\end{itemize}
+
+\section{External programs}\label{sec:qs-external-programs}
+\subsection{Emacs Editing Modes}\label{sec:qs-emacs}\index{emacs}
+
+  I'm assuming basic familiarity with concepts of emacs programming,
+  like ``window'', ``file'', ``buffer'', ``region'', ``point'' and
+  ``mark.''
+
+  I'm also assuming that you know that the key sequence ``C-hm'' means
+  ``Hold down the Control key and type 'h', then type 'm'''.
+
+  I'm assuming you know what ``M-x command'' means.
+
+
+  Emacs has two major modes useful in editing and running IDL,
+  respectively. They are maintained by Carsten Dominik, a truly
+  whizzbang programmer and may be retreived from:
+
+  $<$http://www.strw.leidenuniv.nl/~dominik/Tools/idlwave/$>$
+
+  The two modes are:
+
+
+  \begin{itemize}
+    \item \textit{idlwave-mode}
+
+      A major mode for editing IDL .pro files. It knows about the
+      syntax of IDL, has many built in abbreviations and it
+      communicates  flawlessly with the other mode \ldots
+
+
+    \item \textit{idlwave-shell}
+
+      A major mode derived from \prit{shell} mode which allows one to
+      run an IDL session from within and emacs buffer.
+
+  \end{itemize}
+  
+   I'm going to show you what I have in my .emacs for these two
+  modes. After retreiving and reading the material from Carsten
+  Dominik, you can decide what you want to keep. In addition to what I
+  have you may need to set the emacs variables
+  ``Info-default-directory-list'' and perhaps
+  ``idlwave-help-directory'' and/or ``idlwave-help-path'' depending on
+  where you've put various info files and the idl help file which
+  Carsten has created from RSIs online help.
+
+
+  This is the portion my .emacs file customizing my idlwave-mode and
+  idlwave-shell-mode setup.
+
+
+\begin{verbatim}
+
+(global-font-lock-mode t)
+(autoload 'idlwave-mode "idlwave" "IDLWAVE Mode" t)
+(autoload 'idlwave-shell "idlw-shell" "IDLWAVE Shell" t)
+(setq auto-mode-alist  
+   (cons '("\\.pro\\'" . idlwave-mode) auto-mode-alist))
+
+
+  ;; Set up idl mode
+(add-hook 'idlwave-mode-hook
+ (function 
+  (lambda ()
+    (setq                       ; Set options here
+     idlwave-block-indent 2          ; Indentation settings
+     idlwave-main-block-indent 3
+     idlwave-end-offset -2
+     idlwave-continuation-indent 1
+       ;; Leave ";" but not ";;" anchored at start of line.
+     idlwave-begin-line-comment "^\;[^\;]" 
+     idlwave-surround-by-blank t     ; Turn on padding symbols =,<,>, etc.
+     abbrev-mode 1              ; Turn on abbrevs (-1 for off)
+     idlwave-pad-keyword nil         ; Remove spaces for keyword assign '='
+       ;; If abbrev-mode is off, then case changes (the next 2 lines)
+       ;; will not occur.
+     idlwave-reserved-word-upcase t  ; Change reserved words to upper case
+     idlwave-abbrev-change-case nil  ; Don't force case of expansions
+     idlwave-hang-indent-regexp ": " ; Change from "- "
+     idlwave-show-block nil          ; Turn off blinking to matching begin
+     idlwave-abbrev-move t           ; Allow abbrevs to move point backwards
+     case-fold-search t        ; Make searches case insensitive
+     )
+    
+    ;; Run other functions here
+    (font-lock-mode 1)           ; font-lock mode
+    (idlwave-auto-fill-mode 1)  ; Turn on auto filling
+      ;; Pad with with 1 space (if -n is used then make the 
+      ;; padding a minimum of n spaces.)  The defaults use -1
+      ;; instead of 1.
+    (idlwave-action-and-binding "=" '(idlwave-expand-equal 1 1))
+    (idlwave-action-and-binding "<" '(idlwave-surround 1 1))
+    (idlwave-action-and-binding ">" '(idlwave-surround 0 1)) 
+      ;; Otherwise, object code '->' comes out as '- > '
+    (idlwave-action-and-binding "&" '(idlwave-surround 1 1))
+      ;; Only pad after comma and with exactly 1 space
+    (idlwave-action-and-binding "," '(idlwave-surround nil 1))
+      ;; Set some personal bindings
+      ;; (In this case, makes `,' have the normal self-insert behavior.)
+    (local-set-key "," 'self-insert-command)
+      ;; Create a newline, indenting the original and new line.
+      ;; A similar function that does _not_ reindent the original
+      ;; line is on "\C-j" (The default for emacs programming modes).
+    (local-set-key "\n" 'idlwave-newline)
+      ;; (local-set-key "\C-j" 'idlwave-newline) ; 
+    )
+  )
+ )
+
+  ;; This defines what gets added to the buffer when you press
+  ;; 'C-cC-h'
+
+(setq idlwave-file-header
+  (list nil 
+        "\;+
+\; NAME:  
+\; $Id:$
+\; PURPOSE:  
+\;
+\; AUTHOR:  
+\;
+\; CATEGORY:  
+\;
+\; CALLING SEQUENCE:  
+\; 
+\; INPUTS:  
+\;
+\; OPTIONAL INPUTS:  
+\;      
+\; KEYWORD PARAMETERS:  
+\;
+\; OUTPUTS:  
+\;
+\; OPTIONAL OUTPUTS:  
+\;
+\; COMMON BLOCKS:  
+\;
+\; SIDE EFFECTS:  
+\;
+\; RESTRICTIONS:  
+\;
+\; PROCEDURE:  
+\;
+\; EXAMPLE:  
+\;
+\; MODIFICATION HISTORY:
+\;
+\; $Log:$
+\;
+\;Jet Propulsion Laboratory
+\;Copyright (c) YYYY, California Institute of Technology
+\;Government sponsorship under NASA Contract NASA-1260 is acknowledged.
+\;-
+") )
+
+
+  ;; Set up the idlwave-shell-mode hook to configure comint-mode
+  ;; correctly.
+
+(add-hook 'idlwave-shell-mode-hook
+          (lambda ()
+            (setq  idlwave-shell-fix-inserted-breaks t )
+            (local-set-key "\C-a" 'comint-bol)
+            (set (make-local-variable 'comint-input-ring-file-name)
+                 "~/.idlwhist")
+            (comint-read-input-ring)))
+
+(add-hook 'idlwave-shell-sentinel-hook 'comint-write-input-ring)
+
+
+(setq font-lock-maximum-size 1000000)
+(add-hook 'idlwave-mode-hook 'turn-on-font-lock)
+
+\end{verbatim}
+
+
+  A note on the documentation header. (idlwave-file-header) There is a
+  IDL routine called ``DOC\_LIBRARY.'' If you execute this routine
+  with a string argument which is the name of a routine, doc\_library
+  searchs for the file containing that routine and displays its
+  documentation header. The documentation header is everything between
+  ';+' and ';-'.
+
+  So, doing \\
+
+  \IDL{doc\_library,'map\_set'} 
+
+  Will print out the header of the map\_set procedure. 
+
+  This only works for routines that are in the IDL source language, it
+  doesn't work for builtin routines (e.g. reform, transpose).
+
+  But if you follow this convention, it's a good way to provide users
+  with information about your routines and with this
+  \prit{idlwave-mode} major mode, you can get a template document
+  header into your buffer by merely typing ``C-cC-h.''\footnote{but
+  only in a buffer that's in idlwave-mode}
+
+\subsection{idlwave-mode}\label{sec:qs-idlwave-mode}\index{idlwave-mode}
+
+  Once you've made these modifications to your .emacs file, whenever you
+  visit a file whose extension is '.pro' you'll find yourself in the
+  idlwave-mode. Without knowing the reason why I tell you this, type
+  'C-cC-s.' This should open another buffer named 
+
+  ``IDL-Shell:run Abbrev'' 
+
+  The point will be in this new buffer, so move it back into the
+  idlwave-mode buffer, the one with the file. Once there, do
+  ``C-hm''. A buffer named *Help* will appear with the following
+  information:
+
+\begin{verbatim}
+IDLWAVE mode:
+Major mode for editing IDL and WAVE CL .pro files.
+
+The main features of this mode are
+
+1. Indentation and Formatting
+   --------------------------
+   Like other Emacs programming modes, C-j inserts a newline and indents.
+   TAB is used for explicit indentation of the current line.
+
+   To start a continuation line, use M-RET.  This function can also
+   be used in the middle of a line to split the line at that point.
+   When used inside a long constant string, the string is split at
+   that point with the `+' concatenation operator.
+
+   Comments are indented as follows:
+
+   `;;;' Indentation remains unchanged.
+   `;;'  Indent like the surrounding code
+   `;'   Indent to a minimum column.
+
+   The indentation of comments starting in column 0 is never changed.
+
+   Use M-q to refill a paragraph inside a comment.  The indentation
+   of the second line of the paragraph relative to the first will be
+   retained.  Use C-c C-a to toggle auto-fill mode for these comments.
+   When the variable `idlwave-fill-comment-line-only' is nil, code
+   can also be auto-filled and auto-indented (not recommended).
+
+   To convert pre-existing IDL code to your formatting style, mark the
+   entire buffer with C-x h and execute M-x idlwave-expand-region-abbrevs.
+   Then mark the entire buffer again followed by M-C-\ (`indent-region').
+
+2. Routine Info
+   ------------
+   IDLWAVE displays information about the calling sequence and the accepted
+   keyword parameters of a procedure or function with C-c ?.
+   C-c C-v jumps to the source file of a module.
+   These commands know about system routines, all routines in idlwave-mode
+   buffers and (when the idlwave-shell is active) about all modules
+   currently compiled under this shell.  Use C-c TAB to update this
+   information, which is also used for completion (see item 4).
+
+3. Online IDL Help
+   ---------------
+   M-? displays the IDL documentation relevant
+   for the system variable, keyword, or routine at point.  A single key
+   stroke gets you directly to the right place in the docs.  Two additional
+   files (an ASCII version of the IDL documentation and a topics file) must
+   be installed for this - check the IDLWAVE webpage for these files.
+
+4. Completion
+   ----------
+   M-tab completes the names of procedures, functions
+   class names and keyword parameters.  It is context sensitive and
+   figures out what is expected at point (procedure/function/keyword).
+   Lower case strings are completed in lower case, other strings in
+   mixed or upper case.
+
+5. Code Templates and Abbreviations
+   --------------------------------
+   Many Abbreviations are predefined to expand to code fragments and templates.
+   The abbreviations start generally with a `\`.  Some examples
+
+   \pr        PROCEDURE template
+   \fu        FUNCTION template
+   \c         CASE statement template
+   \sw        SWITCH statement template
+   \f         FOR loop template
+   \r         REPEAT Loop template
+   \w         WHILE loop template
+   \i         IF statement template
+   \elif      IF-ELSE statement template
+   \b         BEGIN
+   
+   For a full list, use M-x idlwave-list-abbrevs.  Some templates also have
+   direct keybindings - see the list of keybindings below.
+
+   C-c C-h inserts a documentation header at the beginning of the
+   current program unit (pro, function or main).  Change log entries
+   can be added to the current program unit with C-c RET.
+
+6. Automatic Case Conversion
+   -------------------------
+   The case of reserved words and some abbrevs is controlled by
+   `idlwave-reserved-word-upcase' and `idlwave-abbrev-change-case'.
+
+7. Automatic END completion
+   ------------------------
+   If the variable `idlwave-expand-generic-end' is non-nil, each END typed
+   will be converted to the specific version, like ENDIF, ENDFOR, etc.
+
+8. Hooks
+   -----
+   Loading idlwave.el runs `idlwave-load-hook'.
+   Turning on `idlwave-mode' runs `idlwave-mode-hook'.
+
+9. Documentation and Customization
+   -------------------------------
+   Info documentation for this package is available.  Use M-x idlwave-info
+   to display (complain to your sysadmin if that does not work).
+   For Postscript and HTML versions of the documentation, check IDLWAVE's
+   homepage at `http://www.strw.leidenuniv.nl/~dominik/Tools/idlwave'.
+   IDLWAVE has customize support - see the group `idlwave'.
+
+10.Keybindings
+   -----------
+   Here is a list of all keybindings of this mode.
+   If some of the key bindings below show with ??, use C-h k
+   followed by the key sequence to see what the key sequence does.
+
+key             binding
+---             -------
+
+C-S-mouse-2     idlwave-shell-mouse-help
+S-mouse-2       idlwave-shell-mouse-print
+C-j             idlwave-newline
+=               ??
+,               self-insert-command
+>               ??
+<               ??
+&               ??
+S-mouse-3       idlwave-mouse-context-help
+M-tab           idlwave-complete
+ESC             Prefix Command
+"               idlwave-show-matching-quote
+'               idlwave-show-matching-quote
+C-tab           idlwave-hard-tab
+C-c             Prefix Command
+
+ESC ?           idlwave-context-help
+ESC s           idlwave-edit-in-idlde
+ESC q           idlwave-fill-paragraph
+ESC C-q         idlwave-indent-subprogram
+ESC RET         idlwave-split-line
+ESC C-u         idlwave-backward-up-block
+ESC C-d         idlwave-down-block
+ESC C-p         idlwave-backward-block
+ESC C-n         idlwave-forward-block
+ESC C-h         idlwave-mark-subprogram
+ESC C-e         idlwave-end-of-subprogram
+ESC C-a         idlwave-beginning-of-subprogram
+
+C-c C-x         idlwave-shell-send-char
+C-c C-y         idlwave-shell-char-mode-loop
+C-c =           idlwave-resolve
+C-c TAB         idlwave-update-routine-info
+C-c ?           idlwave-routine-info
+C-c C-v         idlwave-find-module
+C-c C-b         idlwave-list-buffer-load-path-shadows
+C-c C-l         idlwave-shell-recenter-shell-window
+C-c C-s         idlwave-shell
+C-c C-k         idlwave-kill-autoloaded-buffers
+C-c C-w         idlwave-while
+C-c C-r         idlwave-repeat
+C-c C-f         idlwave-for
+C-c C-d         idlwave-debug-map
+C-c C-c         idlwave-case
+C-c RET         idlwave-doc-modification
+C-c C-h         idlwave-doc-header
+C-c C-a         idlwave-auto-fill-mode
+C-c C-n         idlwave-next-statement
+C-c C-p         idlwave-previous-statement
+C-c ]           idlwave-close-block
+C-c }           idlwave-end-of-block
+C-c {           idlwave-beginning-of-block
+C-c ;           idlwave-toggle-comment-region
+C-c SPC         idlwave-hard-tab
+
+C-c C-d C-f     idlwave-shell-window
+C-c C-d C-down  idlwave-shell-stack-down
+C-c C-d C-up    idlwave-shell-stack-up
+C-c C-d C-t     idlwave-shell-toggle-toolbar
+C-c C-d C-l     idlwave-shell-redisplay
+C-c C-d C-w     idlwave-shell-resync-dirs
+C-c C-d C-e     idlwave-shell-run-region
+C-c C-d C-x     idlwave-shell-goto-next-error
+C-c C-d @       idlwave-shell-save-and-batch
+C-c C-d C-c     idlwave-shell-save-and-run
+C-c C-d ?       idlwave-shell-help-expression
+C-c C-d C-p     idlwave-shell-print
+C-c C-d C-q     idlwave-shell-quit
+C-c C-d C-z     idlwave-shell-reset
+C-c C-d C-y     idlwave-shell-execute-default-command-line
+C-c C-d C-r     idlwave-shell-cont
+C-c C-d C-h     idlwave-shell-to-here
+C-c C-d RET     idlwave-shell-return
+C-c C-d C-o     idlwave-shell-out
+C-c C-d C-u     idlwave-shell-up
+C-c C-d C-k     idlwave-shell-skip
+C-c C-d C-n     idlwave-shell-stepover
+C-c C-d C-s     idlwave-shell-step
+C-c C-d C-a     idlwave-shell-clear-all-bp
+C-c C-d C-d     idlwave-shell-clear-current-bp
+C-c C-d TAB     idlwave-shell-break-in
+C-c C-d C-b     idlwave-shell-break-here
+
+\end{verbatim}
+
+
+  The reason I told you to do a ``C-cC-s'' (which means ``Start a
+  IDL-Shell'') was to get all the bindings starting with
+  ``C-cC-d''. If you hadn't started the idl-shell buffer, those
+  bindings wouldn't have been present, with the exception of
+  ``C-cC-dC-b,'' the binding to set a breakpoint.
+
+
+  You may now insert into this file a template for a procedure
+  definition, for instance, by typing \V\pr<space>\ and idlwave-mode
+  will expand that template into the buffer for you. An IF/THEN/ELSE
+  template results after typing \V\i<space>\
+
+  Idlwave-mode knows about indentation and syntax. Provided you've
+  turned font-locking on it will colorize the various parts of the
+  buffer for you to indicate their place in the grammar of the
+  language. 
+
+  Additionally, you can communicate between the ``editing'' portion of
+  your work and the ``debugging'' or ``running'' portion by means of
+  the keybindings that translate into actions in the IDL shell buffer,
+  such as setting and clearing breakpoints and so on. Most of these
+  have \prbf{``C-cC-d''} as their ``prefix,''
+
+
+\subsection{idlwave-shell}\label{sec:qs-idlwave-shell}\index{idlwave-shell}
+
+  When you've written the code you want to write, you can compile the
+  program by typing 
+
+  \prbf{``C-cC-dC-c''}
+
+   with point in the editing buffer and \prit{voila!} the
+  appropriately worded ``.compile'' statement will be magically
+  executed in the IDL-Shell buffer.
+
+  If you want to set a breakpoint at a certain line, just put the point
+  on that line and say 
+
+  \prbf{``C-cC-dC-b''}
+
+  You'll see the line
+
+  \prbf{``breakpoint,'/path/to/the/file/Im/working/on.pro',xxx'' }
+
+  appear in IDL-Shell buffer. This is how you set a breakoint in IDL,
+  by calling this procedure, the ``C-cC-dC-b'' keybinding calls it
+  for you with the correct information.
+
+  Then run the routine. When the interpreter reaches that line, it
+  will stop, and emacs will reconfigure itself so that the file
+  containing the breakpoint is in one buffer with the breakpoint
+  highlighted and the IDLWAVE-Shell will be in the other waiting for
+  fresh instructions.
+
+  For here you can .step (.s), .step-over (.so), run to the exit of
+  this module (.o) or continue (.c), which will run until the main
+  level is reached.
+
+  If you want to clear the breakpoint, so 
+
+  \prbf{C-cC-dC-d}
+
+  You're probably seeing a pattern here; all the keybindings for
+  commands that control IDLWAVE-Shell have a prefix of C-cC-d. So you
+  really only have to remember that last key 
+
+  \subsubsection{idlwave-shell keybindings}
+  
+
+    \begin{itemize}
+
+    \item \textbf{b} Put a breakpoint on the line with point. 
+           Think ``Breakpoint''
+
+    \item \textbf{d} Delete the breakpoint on the line with
+           point. Thing ``Delete breakpoint''
+
+    \item \textbf{c} Save file in buffer and ``.run'' it. If the file
+  is a procedure/function, this will simply compile it. If it is a main level
+  routine, this will also execute it. Think ``Compile''
+
+    \item \textbf{e} Compile and run the region defined by
+    point/mark. Think ``Execute''
+
+    \end{itemize}
+
+  
+  On of the most useful aspects of IDL-Shell is the ability to put
+  some small fragment of code into an arbitrary buffer and run it.
+
+
+  So, one could do the following. Comments appear 
+
+   \prbf{;;behind two semi-colons and in bold face}, while 
+   \emacs{commands will appear thusly}
+
+\begin{alltt}
+
+  \emacs{``C-b foo RET''}
+
+   \prbf{;; now point is in the buffer named ``foo''}
+
+   \emacs{``M-x idlwave-mode RET''}
+
+   \prbf{;; now buffer foo is an idlwave-mode buffer}
+   \prbf{;; type in some IDL commands}
+
+   j=0
+   for i=0,10 do begin 
+     j=j+1 \prbf{;;don't ask why I'd want to do this!}
+   endfor 
+
+   \emacs{``C-xh''}
+   \prbf{;; now the entire buffer is marked}
+   \emacs{``C-cC-dC-e}
+
+   And this last command would ``execute'' that buffer in the
+  idlw-shell buffer.
+
+\end{alltt}
+
+  This last emacs command writes this file out to a temporary name and
+  then ``.run''s that temporary file. It even puts a ``END'' at the
+  end of the file if one isn't there.
+
+  
+  I can't tell you how much I do this. When I'm developing a new piece
+  of software, I'll frequently create the datasets I need for the
+  several sections of the code I'm working on, put snippets of test
+  code in a temporary buffer -- which I put into ``idlwave-mode'' --
+  and then run that code using the following method and check the
+  results. If it isn't what I want, I go back, make some changes to
+  the temporary buffer and run it again. I repeat this process until I
+  have want I want. Then I'm finished with that section of the
+  program, so I clear out the temporary buffer and move on to the
+  next.
+
+  This method allows me to work on just a part of the program at a
+  time in real time; I don't have to write the program in it's
+  entirety, run it and debug the output. some of the programs I write
+  are rather long and take a fair amount of time to run, so being able
+  to see intermediate results in a great help in the development cycle.
+
+  So, I use this method while developing large segments of code to build
+  up the program I'm working on and when it's reached a certain
+  ``critical mass'' I slap a Pro/Function definition statement at the
+  top, write it out to some file with a real name and \prit{viola} a
+  new IDL module.
+
+
+  This is also helpful for 'specialty' projects. I make a directory
+  with all the data needed and a README file which is just the IDL
+  code used to make the product. Then, when I need to make that
+  product, I haul the README into an emacs buffer, change the major
+  mode to ``idlwave-mode'', mark the whole buffer and ``C-cC-dC-e''
+  it. \prit{Voila}, done!
+
+\section{External Resources}\label{sec:qs-resources}
+
+\subsection{Humans}\label{sec:qs-humans}
+\begin{itemize}
+  \item \textit{Dave Fanning's Website}
+ 
+   Dave Fanning has been in the business of teaching IDL classes for
+  about 10 years now. He is the acknowledged programming guru for the
+  language. His website has some very useful routines as well as
+  searching capabilities. Check it out!
+
+   See: $<$ http://www.dfanning.com/ $>$
+
+  \item \textit{The IDL/PV-Wave Newsgroup}
+
+   The IDL Usenet newsgroup is $<$ news:comp.lang.idl-pvwave $>$ All the
+  major IDL guru's hang out there and will usually answer your
+  questions.
+
+
+\end{itemize}
+\subsection{Books}\label{sec:qs-books}
+  
+\begin{itemize}
+  \item \textit{Dave Fanning's Book}
+
+  Dave Fanning's book is now in it's second edition. It's available at
+  amazon or off his website. He also has recommendations for other
+  books.
+
+  See:
+
+  $<$ http://www.amazon.com/exec/obidos/ASIN/096623832X/qid=996077061/sr=2-1/\BS
+  ref=aps\_sr\_b\_1\_1/103-9462890-4036667 $>$
+
+  or:
+
+   $<$ http://www.dfanning.com/documents/books.html $>$
+
+  \item \textit{Others}
+
+\end{itemize}
+

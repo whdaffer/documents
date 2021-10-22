@@ -1,0 +1,109 @@
+\section{Conventions}\label{sec:Conventions}
+
+    Code to be entered at the the IDL command line or examples of same will
+    appear as:
+
+    \IDL{foo}
+    
+    and if there are multiple lines, as
+
+    \begin{IDLExample}
+      \begin{verbatim}
+
+       This is the first line
+
+       And this is the second
+
+      \end{verbatim}
+    \end{IDLExample}
+        
+
+    Examples of IDL code, particular \prit{BLOCK} code will appear
+    something like:
+
+
+    \begin{IDLExample}
+\begin{verbatim}
+
+    IF ... THEN BEGIN
+      statement 1
+    ENDIF ELSE BEGIN
+      statement 2
+    ENDELSE
+
+     \end{verbatim}
+ \end{IDLExample}\index{if/then/else}
+
+\section{Assumptions and Method}\label{sec:Assumptions}
+
+    I assume that the reader understands:
+    \begin{itemize}
+        \item The fundamentals of software languages: operator
+         precedence, truth/falsity, the notion of ``assignment,'' 
+         of an \textbf{L-value}, \ldots etc.
+
+        \item The difference between an \textit{interpreted} and
+              \textit{compiled} languages.
+         \item and the basics of vectors and arrays.
+    \end{itemize}
+
+   I further assume that:
+
+   \begin{itemize}
+
+     \item That we are working on a Unix system, using X11.
+
+     \item That your IDL version $>$= 5.2
+
+   \end{itemize}
+
+
+   I'm going to try to give examples which will be useful to people
+  doing our sort of work, but I'm not going to try to define
+  everything before I use it. Rather I'm going to assume that the
+  reader will be able to get the sense of what I'm doing in my
+  examples and go look up everything they need to on their own. If
+  this works, by the time you see the explanation of any particular
+  used but undefined element of the IDL language you will most likely
+  already have guessed at the explanation, and things will move that
+  much faster for all of us.
+  
+  And I will use several IDL routines without really explaining them.
+  I'll try to put comments that explain the situation, but I'm
+  expecting you to go look up any routines you don't understand. To
+  that end, I expect much use of IDL's online help facility.
+
+\newpage
+\section{Getting Help}\label{sec:Getting-Help}
+
+  \SH{idlhelp \&}
+
+   -- or --
+
+   \IDL{?}
+
+   Hit the ``index'' tab on the window which opens up. Type in
+   whatever is troubling you. Follow your nose.
+
+   You can get help about the variables in your IDL session by doing 
+
+   \IDL{help}\index{Useful Routines!help}\index{getting help}
+   
+   which will show you a list of (basically) everything going on in
+   your session. You can limit the information by using keywords to
+   the \textit{help} command. For example, to see help which files are
+   open, do
+
+  \IDL{help,/files}
+
+  To get information on your current graphics environment, i.e. where
+  the output from the graphics routines will go, do
+
+  \IDL{help,/graphics}
+
+  You should probably use idlhelp to look up the help command right now.
+
+
+
+
+

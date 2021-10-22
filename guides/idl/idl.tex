@@ -1,0 +1,848 @@
+\input{/Users/whd/latex/mydefs.tex}
+\input{/Users/whd/latex/idl/idldefs.tex}
+
+
+\documentclass{article}
+\title{Rank Beginner's Guide to using IDL}
+\author{W. H. Daffer}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{Conventions and Assumptions}
+
+  The following assumptions about the users knowledge are made:
+
+\bi
+  \item The distinctions between an ``interpreted'' language and one
+        that is ``compiled.'' 
+  \item The notions of ``subroutine''\footnote{In IDL, this is called
+        a ``procedure.''} and ``function'' and the attendant notion of
+        a ``calling stack''
+  \item The fact that in an interpreter such as IDL the interpreter
+        itself is the ``main'' program, and calls all other
+        ``procedures'' and ``functions.''
+  \item Some basic familiarity with matrix operations.
+\ei
+
+
+ IDL commands to be issued at the command line will appear as:
+
+  \IDL{foo}
+
+  One line text output from the IDL interpreter will appear as:
+
+  \IDLOUT{bar baz}
+
+  Multi-line output will appear as:
+
+  \begin{verbatim}
+	A line of output
+
+	Another line of output.
+
+  \end{verbatim}
+
+
+  Shell Commands to be issued at the Shell command line will appear as:
+ 
+   \SH{foo}
+
+
+\newpage
+\section{Quick Start}
+
+  If you think you you've got the right stuff!
+
+  Examples:
+
+\bi
+  \item Creating constants
+   
+     A byte:
+
+      \IDL{A = 0b}
+
+     A 16 bit (short) integer
+
+       \IDL{A = 0}
+
+     A Longword (4 byte integer)
+
+      \IDL{A = 1L}    
+
+     A float (4 byte)
+
+      \IDL{A = 0.0}
+  
+     A double (8 byte float)
+
+      \IDL{A = 0.0d}
+
+     A single precision complex number
+
+      \IDL{A = complex(0.0,0.0)}
+
+     A string
+
+     \IDL{A = ``foo''}
+
+     A structure:
+
+     \IDL{a = \LB a:0, b:0.0, c:``a'' \RB }
+
+
+  \item Creating arrays:
+  
+     \bi
+	\item Explicitly
+	  
+	   \IDL{A = [0,1,2,3]}
+	
+	    A is an integer (16 bit) array
+    
+	   \IDL{A = [0,1,2,3l]}
+
+            A is a longword array (why?)
+
+
+            \IDL{A = [``a'', ``b'', ``c'']}
+
+	    A is a string array
+
+
+	    \IDL{A = [ 0b, 1l, 2.0] }
+	
+	    A is a \prbf{float} array (why?)
+
+	
+	\item by call to function
+
+	    \IDL{A=findgen(100)}
+
+		A = [0.0,1.0,2.0, \ldots , 99.0 ]
+
+      	    \IDL{A = bindgen(512) }
+
+	        A = [0b,1,2, \ldots, 255, 0, 1, \ldots, 255]
+
+	        (Get it? It's a \prbf{byte}, so it only goes up to
+                255, then in wraps mod 256!)
+
+	    \IDL{A=indgen(2,3)}
+
+	    A is a 2 by 3 array arrange as:
+
+%	\begin{center}
+	\[ A = \left[ \begin{array}{ccc}
+            0 & 1\\
+            2 & 3\\
+            4 & 5\\
+	\end{array} \right] \]
+%	\end{center}
+
+        \item As result of operation
+
+	   \IDL{A = sin(findgen(100)/99*!pi)}
+
+	   A is a one hundred element vector, with a 1 period unit
+           amplitude  sine wave in it.
+
+	  \IDL{A = findgen(360)\#replicate(1.,180)}
+
+	  A is a 360 by 180 array, useful for representing longitudes
+          on a 1 by 1 degree grid. ``Replicate'' creates an array of
+          specified dimension(s) filled with the number appearing as
+          the first parameter. In this case, a 180 element vector
+          filled with ``1''.
+
+          The ``\#'' is one of the two IDL matrix multipliers, the
+          other being ``\#\#'', of which I will have more to say
+          later.\footnote{And boy, won't you be confused then!}
+
+	  \IDL{B = replicate(1.,360)\#(findgen(180)-90)}
+
+   	  B is the array of latitudes which go with ``A''
+
+          Note that ``replicate'' and ``findgen'' have been
+          switched. You'd suspect that whichever way the longitudes in
+          ``A'' ran, the latitudes in ``B'' would run the other way,
+          and you'd be right. In fact, the longitudes in A run along
+          the rows of the array and the latitudes in B run along
+          the columns.
+          
+     \ei
+
+  \item Types of routines
+	
+    There are two types of routines, builtin and .pro files. Builtin
+    routines are written in C or Fortran and compiled or dynamically
+    linked\footnote{see \prit{linkimage} and \prit{call\_external} for
+    discussion of how a user may accomplish the same thing themselves}
+    into the IDL executable.
+
+    .PRO files are in the IDL ``source'' language. They must be
+    ``interpreted'' by the interpreter before being executed. The IDL
+    interpreter precompiles these into a pseudo-code, and it is this
+    pseudo-code which is actually run. The interpreter finds these
+    files by means information contained in the user's environment
+
+  \item Environment
+
+     IDL depends on several environmental variables, IDL\_PATH and
+     IDL\_STARTUP. In order for these to work, they must be defined
+     before entering IDL.
+
+ 
+   \bi 
+    \item IDL\_PATH
+
+     IDL\_PATH is the standard unix path variable, except that it
+     tells the IDL interpreter to find the IDL files. There are,
+     however, two differences.
+	
+     \be 
+       \item The Plus sign  (``+'') semantics
+
+         If you put a plus sign ``+'' in front of an element of this
+         path, the interpreter will recursively descend starting
+         from that directory, adding directories as it goes. This
+         means that if you keep all your code in subdirectories of your ~/idl
+         directory, you need only at ``+/your/home/dir/idl'' to the
+         IDL\_PATH and the interpreter will do the rest for you.
+
+	Example:
+	
+      \item \LT IDL\_DEFAULT \GT semantics
+
+	You should alway end your path with \LT IDL\_DEFAULT \GT\.
+        This is the path to RSI supplied .pro file. 
+
+     \ee
+
+     Example: 
+
+       setenv IDL\_PATH ``+/home/whdaffer/idl:\LT IDL\_DEFAULT \GT''
+
+     This will find all the .pro files in any directory below and
+     including /home/whdaffer/idl and all the default .pro files which
+     RSI provides.
+  
+   \item IDL\_STARTUP
+
+     IDL\_STARTUP should point to file which has configuration
+     commands in the IDL language to configure the user environment. It
+     is run each time IDL starts, so have a care which commands you put
+     in there.
+
+
+     A natural set of commands to put into IDL\_STARTUP is commands
+     which configure the graphics environment. Until you become more
+     familiar with the ins-and-outs of configuring the graphics
+     environment, put the following in there.
+
+    \begin{verbatim}
+       device,pseudo=8
+       window,colors=256,/free,/pixmap,xsize=10,ysize=10
+       wdelete,!d.window
+    \end{verbatim}
+
+    This will set your graphics environment to use 8 bit color with
+    256 colors.
+
+     If you want to do 24 bit color, you have to remove these lines from
+     your IDL\_STARTUP file!
+
+  \ei
+
+  \item A word about Column/Row Major and the arrangement of arrays.
+
+   Forget about column/row major! The only important issue is which
+   index varies first. In IDL it goes left to right (like
+   Fortran). The first index varies fastest, followed by the second,
+   followed by the third, \ldots , up to the eighth.
+
+   Now when you plot an array to the screen, say you're plotting an
+   image array, the question of which index is which becomes important
+   because we naturally think of a computer screen as being arranged
+   by row and column. In that circumstance all you need to know is
+   that the IDL array thinks of the first index as the column and the
+   second as the row and that this is the natural way to think of it
+   in an image processing context.
+
+   But when you go to do linear algebra, you'll find yourself
+   reversed, since almost everyone thinks of arrays as row, then
+   column. And the ``\#'' operator works backwards from the normal
+   linear algebra matrix multiplier, it multiplies the rows of the
+   first array against the columns of the second\footnote{although the
+   ``\#\#'' works as expected} so have a care with that one.
+
+   Knowing how the data is arranged in memory will solve \prbf{lots}
+   of problems for you, since it allows you to read files in one
+   slurp, go back and forth between 1-d  and 2-d indexing operations,
+   turn really gnarley multiplications involving lots of loops into
+   one line pieces of elegance which will astound and amaze your
+   compatriots.
+
+   So, start being aware of these matter \prbf{now}
+
+  \item Plotting (and other graphics)
+
+   There are two types of graphics systems in IDL, ``direct'' and
+  ``object.'' I won't be discussing ``object'' graphics at all, so forget
+  they exist.
+
+  There are four broad categories in ``direct'' graphics (hereinafter
+  simply ``graphics''), 2-d plots, 3-d plots, geographic mapping and
+  images.
+
+  A word about the first three and about coordinate transforms.
+
+  When you execute any direct graphics command, except TV where
+  you're just turning pixels on and off and there's no mapping from
+  data to device space, the IDL graphics subsystem must calculate
+  which device pixels to turn on given the coordinates you've passed
+  in the command. Some commands presuppose the existence of this
+  corrdinate transform while others create them anew. If you get the
+  two broad categories mixed up, you'll be seeing a lot of error
+  messages.
+
+  Some commands which create the transform: plot, surface, contour
+  (unless ``overplot'' is set), map\_set.
+
+  Some commands which assume the existence of the coordinate transfer
+  function: oplot, plots, contour (if ``overplot'' is set),
+  map\_continents, map\_grid.
+
+
+  \bi
+    \item 2-d plots
+   
+	\bi 
+	  \item plot
+
+	    plot,Y -- Plots Y against it's index
+
+	    plot,X,Y -- plots Y against X.
+	    
+	    Each call to plot clears the current graphics window
+            \footnote{unless the system variable !p.multi[2] or !p.multi[3]  is
+            non-zero. If so, the graphics window is cleared whenever
+            !p.multi[0] = 0. !p.multi is the way you put multiple
+             plots on the same page or screen}
+
+	  \item oplot 
+
+            A previous call to some graphics routine (e.g. ``plot''
+            which establishes the graphics state of the current window
+            is required before ``oplot'' can be called. And, since
+            ``oplot'' uses the current environment, it's entirely
+            possible that this command will result in \prbf{no data}
+            being drawn to the 
+	    screen. (Why?)
+
+	      oplot,y -- Overplots Y against it's index in the
+              current graphics window. 
+
+	      oplot,x,y -- Overplots Y against X in the current graphics window. 
+
+          \item plots
+
+	    Like ``oplot'' this requires a previous call to some
+            graphics routine that sets the graphics environment. 
+
+	    plots,X,Y -- Plot Y versus X
+
+	  \item variables pertaining thereto
+
+	     psym: The symbol to use
+             symsize: How big to make that symbol
+             linestyle: What sort of line to use.
+             Xrange: limit the X range of the data (plot only)
+             Xrange: limit the Y range of the data (plot only)
+	     Xticks/Yticks/XtickV/YtickV/Xtickformat/Ytickformat
+            \ldots Hell, just look it up in IDLHELP!
+
+
+	\ei
+    \item 3-d plots
+       \bi
+
+         \item surface
+
+	   Allows plotting of surface (i.e. 2-d) variables.
+
+	   surface,Z -- Plots the 2-d array Z against it's indices.
+
+	   surface,Z,X,Y -- plots Z against X and Y
+	  
+	     Either X and Y must have the same dimensionality as Z, or
+            X must have as many rows as Z has columns and Y as many
+            rows as Z has rows. (you figure it out!)
+
+         \item contour
+
+           Contouring of data, the flattened version of surface.
+
+	   Contour,Z -- Make contours of Z against indices.
+          
+           Contour,Z,X,Y  -- Same as above, but use coordinate arrays
+            X and Y. The same restrictions apply here as with ``Surface''
+
+         \item shade\_surf 
+
+	   Same as ``Surface'', but you can supply a ``shading'' to
+            the surface, which is effectively a third dimension.
+
+	  \item variables pertaining thereto
+
+	   t3d, save, xrange, yrange, zrange
+
+ 	   \bi
+	     \item Surface
+	        
+	       az,ax,ay -- the 'aspect' or rotation with respect to
+               these axes.
+	
+	       
+	     \item Contour
+
+	       overplot, noerase, Z, fill, cell\_fill, follow, levels,
+               nlevels, c\_colors, bilinear
+
+	     \item Shade\_Surf
+
+	       shades
+
+	   \ei
+       \ei
+
+    \item Images
+       \bi
+         \item TV
+
+	   TV is the method you put an image on a window.
+
+	   IDL{TV,image,x,y}
+
+            Places ``image'' at the device location
+            ``x,y'' ``Device location is ``pixel number'' so if you
+            say 
+
+           \IDL{TV,image,100,100 }
+
+            then the lower left hand corner of
+            ``image'' will reside on the pixel which is 100 up and 100
+            over from the lower-left hand corner of the window. And
+            the array will be arranged on the window with first row
+            bottom-most.
+
+ 	   TV is very stupid (or trusting, depending on your
+            prespective) so if you try to TV a 500 by 500 element
+            image into a 250 by 250 element window, 3/4 or your image
+            will be off in la-la land.
+	
+	    It also does \prbf{nothing} about scaling the image to
+            meet the demands of the graphics environment, so if you TV
+            an integer array into a window expecting bytes, it will
+            simply convert the image ``mod 256''.  One may do true
+            color images in IDL, but by my assumptions, we're only
+            doing 8 bit color, so the window will only be expecting
+            byte arrays. \footnote{ See section \ref{sec:truecolor}
+            for how to do true color images} 
+
+	    These considerations mean that one should be careful to
+            \prit{scale} images to the range of one byte, which brings
+            us to our next routine:
+       
+
+         \item TVSCL
+
+	    Which scales the image to the range of a byte. Personally
+            I don't every use this routine, I prefer to control the
+            scaling of images myself using the IDL builtin
+            \prit{bytscl}.
+
+
+       \ei
+  \ei
+
+  \item Calling syntax
+  
+   There are two types of programs in IDL: Procedures and
+  Functions. Prodecudes are like subroutines in Fortran (without the
+  'Call' syntax) and functions are, well  \ldots like functions.
+
+   All programs, subprograms, procedures and functions have two types
+  of thing that can be passed them: \prit{positional parameters} and
+  \prit{keywords}. Positional parameters are just like the sort of
+  parameter passing in ``C'' and ``Fortran'' and just about every
+  other language you've ever seen, the first one in the call list is
+  moved into the first one in the declaration list in the source file
+  which defines the program, i.e. they line up one-to-one. Keywords
+  have the calling syntax \prit{keyword = value} and can be placed in
+  any order, because they are recognized by their name.
+
+   The syntax is:
+
+  \bi
+
+   \item Procedure:
+
+   \IDL{foo, a,b,c,/k1,k2=bar,k3=baz}
+
+    Here I've called a procedure, which passes three positional
+    parameters (a, b and c, in that order) and three keywords, k1, k2
+    and k3.
+  
+    K1 is slightly different, but this is just a semantic sugar meaning
+    exactly the same as ``k1=1.''  This sort of syntax is good for
+    boolean quantities
+
+    Notice I've said \prbf{absolutely nothing} about whether these
+    quantities are input or output! And with the exception of the ``k1''
+    keyword, which can only be input, it's because it doesn't
+    matter. These quantities can be input, output, or both.
+
+     Now, if I had, instead, said:
+
+    \IDL{foo, 1,2,3,/k1,k2=3,k3='baz'}
+
+    Then it's clear all of these quantities are \prbf{input} only, since
+    IDL can't store an output quantity into a constant.
+
+    In fact, if you tried this and the routine did try to return a value
+    into the positional parameter ``a'', you'd get a run time error.
+
+  \item Functions 
+  
+   Functions return values, it's a simple as that. So when you call
+    them, you equate some variable to their output.  
+
+  \IDL{bar=foo(a,b,/k1,k2='baz',k3=3*sin(indgen(10)\#barf))}
+
+   Here, a and b are positional parameters, ``k1'' is one of those
+  funny short hand keywords meaning k1=1, k2 is set to a constant
+  ``baz'' and k3 is set to the return of some complicated expression
+  involving all sorts of things.
+
+  Clearly, only ``a'' and ``b'' \prit{may} return values, but ``bar''
+  \prbf{must}!
+
+
+
+
+\ei
+	  
+
+\newpage
+\section{Some Basics, more explicitly}
+
+  IDL is a \prbf{vector} based language, which is a generic term
+  comprising arrays of all sorts up to eight dimensions. This means
+  that all the standard operations take vectors as their arguments. At
+  this level there's no difference between a \prit{vector}, a
+  \prit{multi-dimensioned array} and \prit{scalar}. All operate in the
+  same way.\footnote{There are, however, restrictions imposed on operations
+  that arise from the relative sizes of the various arrays
+  involved. More on this later}
+
+  The fact that IDL is a vector based language means that you can do
+  \prbf{element-by-element} operations on the entire array without
+  having to \prbf{explicitly} iterate over the array, as you would in
+  a compiled language such as ``C'' or ``Fortran.'' The user should
+  reflect on the implications of these statements; it means that
+  there is an implied loop \prbf{in the interpreter} itself.
+
+  It is also a dynamically scoped language. The variables are created
+  on the fly by assigning a pre-existing or created value to them. The
+  type of the assigned to variable is that of the highest precision
+  occuring in the expression to the right of the equals the sign. Only
+  a variable may occur to the left of an equals sign.\footnote{like
+  many languages, the left side must be an \prit{lvalue}} Hence there
+  is very little need to \prit{predefine} variables; in fact it is
+  discouraged that you do so unless absolutely necessary, since all
+  you're doing is wasing space.
+
+
+  So, a scalar may be created merely by assigning to it.
+
+  \IDL{a=1} 
+
+  creates a scalar short (16 bit) integer ``a'' whose value is ``1''.
+
+  If you had, instead entered
+
+  \IDL{a=1L}
+
+  you would have created a 32 byte ``long'' value, and 
+
+  \IDL{a=1.0} 
+
+  would create a 4 byte float.
+ 
+  One may create a vector or an array by simply enclosing a comma
+  separated list of numbers in square brackets, as in:
+
+  
+  \IDL{a=[1,-1,3,5]}
+
+  The type of the array will be the type of the highest precision
+  constant appearing in the list. So:
+
+  \IDL{a=[1b,2,4L,5.0d]} 
+
+   will be a double array since the highest precision variable is a
+   double, i.e. the ``5.0d.''
+
+  You may even create arrays of multiple dimensions explicitly, by
+   enclosing lists of lists, as in:
+
+  \IDL{a=[ [1,2,3],[4,5,6] ]}
+ 
+  I won't tell you want shape this array is, try to guess it! Then
+   execute this at the IDL commandline and do
+
+  \IDL{help,a} 
+
+  to find out what it's dimensions are!
+
+
+  While IDL will create an array having the highest possible
+  precision, which means you can mix \prbf{numbers} in arrays 
+  without regard to the consequences, you may not mix all types in a
+  particular array. IDL arrays are either numeric, string, structure,
+  object or pointer, and each must be kept separate. So you can't do:
+ 
+  \IDL{a=[1b,``b'',2,3]}
+
+
+  without causing an error. 
+
+  Strangely enough, IDL will create this array while emitting an error
+  (go ahead, try it!), but the second element, the ``b'', will be zero.
+
+  In this regard, IDL is different from newer languages, like ``Perl,''
+  which allow for arrays of completely hetrogeneous
+  types.\footnote{And I wish IDL would follow Perl's lead to some
+  extent, particularly with respect to hashes}
+
+  You may, however, have arrays of structures; but here you aren't
+  really violating the prohibition against mixing types within the
+  array, now are you?
+
+
+  Or, one may assign ``a'' as the result of an operation. For
+  instance, one could do:
+
+  \IDL{a=findgen(4)*2}\footnote{See below for a discussion of this function}
+
+  Now a=[0,2,4,6]
+
+  If you create either version of ``a'' variable above and then do 
+
+  \IDL{help} 
+
+  You'll see 
+
+  \begin{verbatim}
+
+	% At  $MAIN$                 
+	A               INT       = Array[4]
+	Compiled Procedures:
+	    $MAIN$
+
+	Compiled Functions:
+
+   \end{verbatim}
+
+  The first line \begin{verbatim} % At $MAIN$ \end{verbatim} show the
+  program level you're in. In this case, since I executed the statment
+  at a command prompt, I'm at the ``MAIN'' level.  If this command had
+  been executed from within a procedure or function, this line would
+  have reflected the fact that the command was not executed at the
+  ``MAIN'' level but at the level of the calling procedure or
+  function.\footnote{For instance: If you'd run this from a routine
+  named \prit{foo}, this would read ``At \$FOO\$''}
+
+  Then you see a list of the variable that exist at that moment, in
+  our case only ``a,'' which is shown as a 4 elements short Integer
+  array (or, vector as I call them)\footnote{see Section \ref{sec:types} below}
+
+  The two lines which begin ``Compiled''\ldots would list the compiled
+  procedures\footnote{Called ``subroutines'' in IDL} and functions, if
+  there had been any when I executed this command.
+
+
+  Now, there are many builtin IDL functions that will create arrays for
+  you, \footnote{ See section \ref{sec:types} below}
+
+  For instance, to create a sine curve over one period, do the
+  following.
+
+  \IDL{x=findgen(360*!pi/180)}
+
+  \IDL{y=sin(x)}
+
+  \IDL{plot,x,y}
+
+   this will create a window with one period of a sine wave of unit
+   period and amplitude.
+
+
+\section{Getting Help}
+
+  At the command prompt, do:
+
+  \SH{idlhelp \&}
+
+  This will open a window entitled ``IDL x.y Online Help'' The fastest
+  way to get help on something is to search for it. Click on the
+  ``Index'' button, type some word in the box, as you type the scroll
+  box will incrementally go down the list finding those things that
+  match your query. When you've found the item in that list, hit
+  ``Display.'' Sometimes it will display a second list from which
+  you'll have to make another choice.
+
+  These are the ``man'' pages for IDL.
+
+\newpage
+\section{Variable Types}\label{sec:types}
+
+   The \prit{size} builtin function provides information about the
+   type of variable passed it.  For instance, if I do the following on
+   the ``a'' I created above:
+
+  \IDL{b=size(a)}
+
+  \IDL{print,b}
+
+   Which will print:
+
+  \IDLOUT{   1           4           4           4 }
+
+   ``Size'' returns information about the variable. Some of the output
+   from IDLHELP on this function reads:
+
+
+
+
+    \prit{The returned vector is always of longword type. The first element
+    is equal to the number of dimensions of Expression. This value is
+    zero if Expression is scalar or undefined. The next elements
+    contain the size of each dimension, one element per dimension
+    (none if Expression is scalar or undefined). After the dimension
+    sizes, the last two elements contain the type code (zero if
+    undefined) and the number of elements in Expression,
+    respectively. The type codes are listed below under IDL Type
+    Codes.}
+
+
+   You can also pull out specific information using ``Size,'' for
+   instance, doing:
+
+   \IDL{b=size(a,/dimensions)}
+
+   Will pull out the values of the various dimensions. In this case, 
+
+  \IDL{print,size(a,/dim)} yeilds
+
+  \IDLOUT{4}
+
+    Since there's only one dimension, i.e. this is a vector of 4
+    elements. If, you had done:
+
+  \IDL{print,size(findgen(3,4),/dim)}
+
+  You would have gotten:
+
+  \IDLOUT{ 3 4 }
+
+
+
+
+   
+   The explicit IDL variable types are:
+
+    
+   \begin{center}
+   \begin{tabular}{l|l|l|l}\hline
+   \multicolumn{1}{|c|}{\sl Name} &
+   \multicolumn{2}{|c|}{\sl Size} &
+   \multicolumn{3}{|c|}{\sl Array} &
+   \multicolumn{4}{|c|}{\sl Cast} \\
+	Byte: & unsigned 1 byte character & bytarr() & byte() \\
+        Int: &  signed 2 byte integer & intarr() & fix() \\
+        Long: & signed 4 byte integer & lonarr() & long() \\
+        Float: & 4 byte float & fltarr() & float() \\
+	Double: & 8 byte float & dblarr() & double() \\
+	Complex: & 2 4byte floats & complexarr() & complex()\\
+	Double Complex: & 2 8 byte floats & dcomplexarr & complex()\\
+	String: & A string of arbitrary length & strarr() & string()\\
+	\hline
+	Structure: & a structure & & & \\
+	Pointer: & A pointer to a variable of any type&ptrarr() &&\\
+	Object: & An object & objarr() & & \\
+	\hline
+	Unsigned Int: & unsigned 2 byte integer & uintarr() & uint()\\
+	Unsigned Long: & unsigned 4 byte integer & ulonarr() & ulong() \\
+	Long Long: &64 bit signed integer & lon64arr() & long64() \\
+	ULongLong: & 64 bit unsigned integer & ulon64arr() & ulong64()\\
+	
+   \end{tabular}
+   \end{center}
+
+   Each of the numeric types also have an analog to create a ``range''
+   of values in that type. Each of these will create an array of the
+   specified number of elements starting at zero.
+
+   \begin{center}
+   \begin{tabular}{l|l|l|l}\hline
+   \multicolumn{1}{|c|}{\sl Type} &
+   \multicolumn{3}{|c|}{\sl Index Generator} \\
+	Byte:    & bindgen() \\
+        Int:     & indgen()/uindgen() \\
+        Long:    & lindgen()/ulindgen \\
+	long64:  & l64indgen()/ul64indgen \\
+        Float:   & findgen() \\
+	Double:  & dindgen() \\
+	Complex: & cindgen() \\
+	Double Complex: & dcindgen() \\
+	String: & singden() \\ 
+   \end{tabular}
+   \end{center}
+
+  An immediate consequence of these generators is that you can quickly
+  and easily create cyclic functions. For instance:
+
+  \IDL{y=sin(findgen(360*3.14159/180.))} 
+
+  gives one period of a sine wave of period 1.
+
+  
+\section{Using}
+  
+  The great strength of IDL is that it allows you to manipulate data
+  at an interactive prompt or run programs that range in complexity
+  from the most simple to the fully developed large scale programs we
+  normally associated with compiled languaged. There are some
+  differences between the two methods of running, which I'll now
+  discuss.
+
+
+\subsection{Interactively}
+\subsection{Programatically}
+\subsection{I/O}
+\subsubsection{Data Files}
+\bi
+  \item Text
+  \item Binary
+   \bi
+     \item Flat Files
+     \item HDF Files
+   \ei
+\ei
+\subsubsection{Save Files}
+\section{Advice}
+\section{Tricks}
+\end{document}

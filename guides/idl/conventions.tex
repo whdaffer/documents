@@ -1,0 +1,133 @@
+\section{Conventions}\label{sec:Conventions}
+
+    Code to be entered at the the IDL command line or examples of same will
+    appear as:
+
+    \IDL{foo}
+
+    Output from IDL will a appear as 
+
+    \IDLOUT{bar} 
+
+    if there is only one line, and as:
+
+
+     \begin{alltt}
+
+       \textit{This is the first line}
+
+       \textit{And this is the second}
+
+    \end{alltt}
+
+    if there is more than one or if there are special characters.
+
+
+    Code to be entered at shell command line will appear as:\\
+
+    \SH{foo}\\
+
+    Examples of IDL code, particular \prit{BLOCK} code will appear
+    something like:
+
+
+\begin{alltt}
+
+    \textbf{IF \ldots THEN BEGIN}\index{if/then/else}
+      \textit{foo bar}
+    \textbf{ENDIF ELSE BEGIN}
+      \textit{ baz }
+    \textbf{ENDELSE}
+
+\end{alltt}
+
+\section{Assumptions and Method}\label{sec:Assumptions}
+
+    I assume that the reader understands:
+    \begin{itemize}
+        \item The fundamentals of software languages: operator
+         precedence, truth/falsity, the notion of ``assignment,'' 
+         of an \textbf{L-value}, \ldots etc.
+
+        \item The difference between an \textit{interpreted} and
+              \textit{compiled} languages.
+         \item and the basics of vectors and arrays.
+    \end{itemize}
+
+   I further assume that:
+
+   \begin{itemize}
+
+     \item That we are working on a Unix system, using X11.
+
+     \item and when we do graphics, it will be true-color
+       (i.e. 32-bit) graphics, but in a manner which will make it
+       appear to be 8-bit.
+
+     \item That your IDL version $>$= 5.2
+   \end{itemize}
+
+
+   I'm going to try to give examples which will be useful to people
+  doing our sort of work, but I'm not going to try to define
+  everything before I use it. Rather I'm going to assume that the
+  reader will be able to get the sense of what I'm doing in my
+  examples and go look up everything they need to on their own. If
+  this works, by the time you see the explanation of any particular
+  used but undefined element of the IDL language you will most likely
+  already have guessed at the explanation, and things will move that
+  much faster for all of us.
+
+  And I will use several IDL routines without really explaining
+  them. I'll try to put comments that explain the situation, but I'm
+  expecting you to go look up any routines you don't understand.
+
+  Which brings me to my first topic \ldots
+
+
+\newpage
+\section{Getting Help}\label{sec:Getting-Help}
+
+  \SH{idlhelp \&}
+
+   -- or --
+
+   \IDL{?}
+
+   Hit the ``index'' tab on the window which opens up. Type in
+   whatever is troubling you. Follow your nose.
+
+   You can get help about the variables in your IDL session by doing 
+
+   \IDL{help}\index{Useful Routines!help}\index{getting help}
+
+  which will show you a list of (basically) everything going on in your
+  session. You can limit the information by using keywords to the
+  \textit{help} command. For example, to see help just on the variables
+  you have defined in your current session, do 
+
+  \IDL{help,/variables}
+
+  or, simply, 
+
+  \IDL{help,/var}
+
+  (IDL allows you to use the smallest unique abbreviation for
+  keywords, which is what ``/variables'' is)
+
+  To see which files are open, do
+
+  \IDL{help,/files}
+
+  To get information on your current graphics environment, i.e. where
+  the output from the graphics routines will go, do
+
+  \IDL{help,/graphics}
+
+  You should probably use idl help to look up the help command right
+  now because there are many, many keywords.
+
+
+
+
+

@@ -1,0 +1,494 @@
+\section{Vanilla string processing}%%%%\ref{sec:vanilla-string-processing}
+
+In versions prior to IDl 5 (I believe) the only sort of string
+processing processing was rudimentary. The basic routines, all of
+which work with scalar or array arguments, were:
+
+\bi
+
+   \item strcompress(string[,/remove\_all])
+
+     Compress multiple blanks/white space down to one blank each, or
+     remove them all if /remove\_all
+
+   \item strupcase(string)
+
+     Uppercase the string
+
+   \item strlowcase(string)
+
+     Lowercase the string
+
+   \item strtrim(string[,flag])
+
+     Remove leading (flag=1), trailing (flag=0 or flag not present)
+     or both (flag=2) blanks.
+
+     This is also a quick way to convert a number to a string if you
+     don't care enough to specify a format.
+
+   \item strpos(string,substring
+            [,start][,/reverse\_offset]
+	    [,/reverse\_search])
+
+     Return the character position at which `substring' occurs
+     starting at `start' (if provided) or -1 if not found. Where the
+     search starts and which direction it goes depends on the two
+     keywords: /reverse\_offset and /reverse\_search. If
+     /revserse\_offset then count backwards from the end. If
+     /reverse\_search then search backwards instead of forwards.
+
+     Will work on arrays.
+
+   \item strmid(string,first\_character,[,length][,/reverse\_offset])
+
+     Remove 'length' (default : all the charcters it can) characters
+     from the string starting at 'first\_character (default = 0
+     counting from the beginning or strlen(string)-1 counting from the
+     end if /reverse\_offset)
+
+     if /reverse\_offset is set, calculate the offset from the end of
+     the string, rather than the beginning.
+
+     Example:
+
+     \IDL{print,strmid('foo.bar',0,3)}
+
+     prints ``foo''
+
+     \IDL{print,strmid('foo.bar',2,3,/reverse)}
+
+      print ``bar''
+     
+    
+    \item strlen(string)
+
+    prints the length of the string
+
+
+    \item strput, destination, source[, position]
+
+    inserts ``source'' into ``desination'' starting at ``position'' (0
+    by default)
+
+    \IDL{t=''foo.bar'' \& strput,t,''baz'',4 \& print,t}
+     
+     prints ``foo.baz''
+
+    \item string(variable [,format=fmt\_spec])
+
+    Converts ``variable'' to a string. If ``format'' isn't present,
+    IDL uses it's default conversion rules. If you want more control,
+    you can specify a format, using one of two format specifications,
+    a ``fortran'' style and a ``C'' style. This is a complicated
+    subject which I'm going to shamelesslly avoid. If you want further
+    information, see ``Using Explicitly Formatted Input/Output'' in
+    the IDL manual.
+
+
+\ei
+
+  A newer, slightly improved version of strpos is strmatch, which
+  allows for a limited set of wildcards, like those one finds in most
+  Unix shells, namely '*' (multiple characters), '?' (a single
+  character) and '[...]', for character classes The prototype is:
+
+  strmatch(string,search\_string [,/fold\_case])
+
+
+\section{Splitting/Joining}%%\ref{sec:split-join}
+
+\bi
+
+  \item strsplit(string,pattern [,count=count]
+                [,escape=string][,/regex][,/fold\_case]
+                [,/extract][,length=length][,/preserve\_null])
+
+   Split the string using ``pattern''. Return the number of fields in
+   ``count'' (if present). Returns the character that starts the next
+   field unless /extract is set, in which case it returns the
+   extracted fields. Case matters unless /fold\_case is set, the
+   lengths of the fields is returned in ``length'' (best used if you
+   haven't set /extract). Null results are quietly discarded unless
+   /preserve\_null is set. This means that
+
+  \IDL{aa=strsplit(``a,b,,c,d'','','',/extract)}
+
+   returns [``a'',''b'',''c'',''d''] 
+
+   while
+
+    \IDL{aa=strsplit(``a,b,,c,d'','','',/extract,/preserve\_null)}
+
+  returns [``a'',''b'','''',''c'',''d''] 
+
+  If /regex, then ``pattern'' is a regular expression, not a simple
+  string. More on this later.
+
+  If not doing regex splitting you can use ``escape'' to remove from
+  consideration what would otherwise count as a delimiter to split
+  on. For example
+
+  \IDL{a=strsplit(``a,b,c'', ``,'')} 
+
+  splits the string into three fields, ``a'',''b'' and ``c''. However,
+
+  \IDL{a=strsplit(``a\,b,c'', ``,'', escape=''\") }
+
+    splits it into two fields, ``a,b'' and ``c''.
+
+   
+    /escape and /regex are incompatible.
+
+
+  \item strjoin(array,delim [,/single])
+
+\ei
+
+
+\section{Regular Expression string manipulation}%%\ref{sec:Regex}
+
+  Regular expression searching was introduced in IDL 5.4 (I think) and
+  is a tremendous help for those tired of having to slog through
+  string processing the old fashioned way. T
+
+  Alas, the downside of regular expression is the fact that you have
+  to learn about regular expressions.
+
+  I'm not going to go discuss this topic in full, mainly because there
+  are whole books written on the subject. I'll give you the prototype,
+  point you to the page in the IDL documentation that discusses this
+  and give you a few examples.
+
+\bi
+  \item strregex(string,regex[,/boolean][,/extract]
+          [,length=length][,/subexp][,/fold\_case] )
+
+   Returns an array of items. What is returned depends on which set of
+  keywords is set. If /boolean, then it returns 1 whenever the regular
+  expression matches, 0 otherwise. Set /fold\_case for case
+  insensitive matching. If you don't set /extract, it returns the
+  start of the match with the length returned in ``length.'' (if
+  present) With /extract, it returns the match or matches (there can
+  be more than one, depending on the regular expression), if anything
+  matched, or the empty string if it didn't. If you don't use
+  sub-expressions, or if you do but you don't set /subexp, it returns
+  the part of each string that matches the regular expression, the
+  empty string if nothing matches for that string. 
+
+  Before I go into the meaning of the /subexp keyword, let me discuss
+  regular expressions in general. 
+
+  
+
+\ei
+
+  \subsection{Regular Expressions}%%\ref{sec:regular expressions}\index{regular expressions}
+
+  The best way to think of regular expressions is not as string
+  searches, \prit{per se} but as little programs in an incredibly
+  condensed, arcane language. This language allows one to specify
+  strings of varying length either exactly or with a multitude of
+  variations, including sub-strings of 0 or more length occuring 0 or
+  more times. In addition, one may capture substrings and return them
+  as sub-expressions (the /subexp above)
+
+  The semantics are:
+
+  \bi
+
+    \item the basis Regexs
+     \bi
+        \item ``.'' Matches any character, except the newline
+
+	  ``a..b'' matches any four character string starting with an
+  ``a'' and ending with a ``b''.
+
+	\item any character that doesn't have a special meaning
+  matches itself, i.e. x matches x, y matches y, 1 matches 1, and so
+  on.
+
+		the regular expression ``abc'' matches itself.
+  
+       \item ``(\ldots)'' Grouping regular expressions
+
+       \item ``[\ldots]'' Character class, matches any of a group of
+  characters
+        
+
+	\item ``a$|$b'' Alternation: constructing matches of one of two
+         (or more) alternative regexs
+
+
+       \item ``\BS'', the ``escape'' character. Putting a backslash
+  before a character that has some special meaning to the regular
+  expression processor removes that special meaning, e.g. ``\BS .''  is
+  the regular expression matching a single dot, so the backslash has
+  removed the special meaning of ``.''
+
+     \ei
+
+    \item Positional Anchors
+  
+     \bi
+  
+       \item \caret Anchors the regex to the beginning of a line
+
+	 So the regex ``\caret Call me Ishmael'' matches the beginning
+  of \prbf{Moby Dick}, but it doesn't match the beginning of an essay
+  about that book, which begins ``Herman Melville's great novel
+  \prbf{Moby Dick} begins ``Call me Ishmael.'''', since that phrase
+  doesn't occur at the beginning of the line.
+
+       \item \$ Anchors the regex to the end of a line
+
+        Simile for \$. The regular expression which ends with \$ only
+  matches the end of the line.
+
+   Which means, that a handy way to match empty lines is with
+  ``\caret\$'' (but only if they have no whitespace. To handle that,
+  see \ldots
+
+  \ei 
+
+  \item Character classes
+
+      A list of characters surrounded by square brackets is a
+  character-class. This regular expression will match any of the
+  characters included in the list however many times allowed for by
+  any quantifiers that apply to that regex.
+
+    For example, the characer class [abcd]+ matches one or more
+  strings consisting only of the characters ``a'', ``b'', ``c'' and
+  ``d''. 
+
+    One may specify some classes as ranges, ``[a-z]'' matches any
+  single lowercase character while ``[A-Z]'' a single uppercase
+  character. The character class ``[a-zA-Z0-9]+'' matches one or more
+  characters and numbers, the character matching regardless of case.
+
+  A regular expression for a valid IDL variable name could be
+
+  ``[a-zA-Z][a-zA-Z0-9\_]*''
+
+   This matches any string which begins with a letter followed by
+  zero or more letters (upper or lower case), numbers or underscores.
+
+  As mentioned above, to match purely empty lines, a not infrequent
+  task, use ``\caret\$.''
+
+  To match empty lines, which might have some whitespace characters
+  like spaces or tabs, use ``\caret [ `` + string(9b) + ``]*\$''
+  (remember, we're speaking IDL here: string(9b) is the ascii tab
+  character)\footnote{Of course, you could also do remove all the
+  whitespace with strcompress(,/remove\_all) and then match on
+  ``\caret\$''}
+
+
+  As you may have noticed, some characters have a special meaning
+  inside character classes. The dash ``--'' is a sort of ``range''
+  operator, for instance. But what if you want to have a dash as one of
+  the characters in the class? And what about the other special
+  characters, ``*'', ``\$'', ``\caret''. The rules that cover this
+  circumstance are:
+
+\bi
+
+  \item Inside a character class the special characters like ``*'',
+  ``\caret'', ``\$'' lose their special meanings (with a few
+  exceptions.)
+
+  \item To include a character that has a special meaning for the
+  character class construct, put it at the beginning of the class (the
+  exception is ``\caret'') The class ``[-abcd]+'' matches any number
+  of characters from the class ``[a-d]'' but also any number of
+  dashes. To match an open square bracket, put that at the front of
+  the class. To match a close square bracket, escape it with ``\\\."
+
+  \item ``\caret'' at the
+  beginning of the class ``negates'' the class. The match is not to
+  what's in the character class but what isn't. So ``[\caret0-9]+''
+  matches everything \prbf{except numbers}. 
+
+
+  \item to match the ``\caret'', put it anyplace other than the first
+  position: the character class ``[a-z0-9\_\caret ]'' matches any
+  single lowercase letter, or any single number, an underscore or the
+  caret.
+
+\ei
+
+    \item Quantifiers
+
+      
+     \bi
+        \item ? Zero or one of the previous regex
+        \item * Any number, including 0, of the previous regex
+        \item + One or more
+	\item $\{$M,N$\}$ At least M but no more than N
+     \ei
+
+  The regex ``a*'' matches any number of the letter ``a'', including
+  zero, hence the regular expression ``ab*c'' matches ``abc'' and
+  ``abbc'' and ``abbbbbbbbbbbbbbbbbc'', but it also matches
+  ``ac.'' 
+
+  The regex ``ab?c'' matches ``ac'' and ``abc'', but not ``abbc.'' 
+
+  The regex ``ab$\{$2,3$\}$c'' matches ``abbc'' and ``abbbc'', but not
+  ``abc'' or ``abbbbc.''
+
+  Putting parentheses around expressions controls the scope of the
+  quantifier. For example ``[a-d](bc)+'' matches ``abc'' and ``abcbc''
+  and even ``abcbcbcbcbcbcbcbc'', but not ``abbc'' since the
+  quantifier applies to the regex ``bc'', not ``b.'' Also note that it
+  doesn't match ``a', since the ``+'' requires at least one ``bc.''
+
+    \item Subexpressions
+
+  Aside from controlling the scope of quantifiers, parentheses allow
+  for the extraction of subexpressions through the joint use of
+  /extract and /subex, or by extacting them yourself using the
+  returned array and the variable returned via length=length. Which
+  slot in the returned value goes with which sub-expression is
+  determined by counting open parentheses starting at the left hand
+  side of the regex. The sub-expression enclosed by the first set of
+  parens goes into the array at index = 1 (not 0! that, for reasons
+  I've never fully understood, is reserved for the whole string) The
+  second goes to index=2, and so on.
+
+  This really only gets to be a problem if you use nested subexpressions. 
+
+  My suggestion is that you try it out a few times.
+
+
+
+\item Grouping and Alternation
+
+  As mentioned above, one can control how the quantifier works by
+  grouping regexs with parentheses. One can also use them with the
+  alternation operator ``\VB'' to specify alternatives.
+
+  Let me give you some examples.
+
+  Say you had a filename with a fairly stable naming convention which
+  you wanted to find using some sort of file searching but it had one
+  part which was 4 characters in one version of the file but 4 numbers
+  in another and you wanted to find both without doing two
+  searches. You could use the regular expression
+
+  ``.*[a-z]$\{$4$\}|$[0-9]$\{$4$\}$.*'' 
+
+  or you could use 
+
+  ``.*([a-z]$|$[0-9])$\{$4$\}$.*''
+
+  Either should work but the latter version will save whichever was in
+  this part of the filename into a subexpression which you can
+  retreive later. Which is a nice way to seque back into \ldots
+
+
+
+
+
+  \ei
+
+  \subsection{Using /extract and /subexp in stregex}
+
+  These are two of the most powerful and useful keywords to this IDL
+  routine, the other being /boolean (for testing for conditions)
+
+
+  When you use /extract and /subexp IDL returns an N by M array, where
+  N is the number of subexpressions +1 (IDL puts an implicit set of
+  parentheses around the whole regex so that the first subexpression
+  returned is the whole match) and M is the number of strings in the
+  input array. If ``fields'' is the returned array, then
+
+  fields[1,0] is the first sub-expression match of the first string
+  fields[N-1,0] is the last
+  fields[1,M-1] is the first sub-expression match of the last string 
+  fields[N-1,M-1] is the last.
+
+
+  Let's do some examples. Say you want to part a time string from a
+  file that has the yyyy-mm-ddThh:mm:ss.ccc format, and you want to
+  parse out all of the individual elements of the string so that you
+  can convert it to julian day and do arithmetic on the times. It
+  might go something like this.
+
+  Define an array of times.
+
+\IDL{date=['2004-01-02T00:00:00.000','2004-02-03T01:02:03.456']}
+
+Define a regular expression
+
+  \IDL{regex1='([0-9]+)-([0-9]+)-([0-9]+)T([0-9]+):([0-9]+):([0-9.]+)'}
+
+
+This says: match anything which has 3 multi-digit numbers separated by a dash, followed by a ``T'', followed by three multi-digit numbers separated by a ``:'', the last of which looks like a float because it has a dot in it.
+
+Now, this regex would certainly match our date strings, but it would
+  match other things too. In fact it would match the string
+  ``1-2-3T4:5:6.''. 
+
+  You could be more exact and eliminiate some false positives with 
+
+
+  \IDL{regex1='([0-9]\{4\})-([0-9]\{2\})-([0-9]\{2\})T([0-9]\{2\}):([0-9]\{2\}):([0-9]\{2\}\BS .?[0-9]\{0,3\})'}
+
+  This one says, match 3 sets of numbers separated by dashes, the
+  first having 4 digits and the next two having 2, followed by a
+  ``T'', followed by three sets of numbers separated by ``:'' , the
+  first two having two digits and the last having 2 digits before a
+  (possibly absent) the decimal sign, followed by between 0 and three
+  digits. 
+
+  It's better, but it could match a string which has five digits in a
+  row at the very end (and you see why?)
+
+
+Better still is:
+
+  \IDL{regex1='([0-9]\{4\})-([0-1][0-9])-([0-3][0-9])T([0-2][0-9]):([0-5][0-9]):([0-6][0-9]\BS .?[0-9]\{0,3\})'}\footnote{Yes, that's a 60 there. Some schema allow it to handle leap-seconds}
+
+But even this would match ``2005-19-39T29:00:69999''
+
+Personally, I'd use the first one when I'm pretty sure the input data
+doesn't have any false-positives in it.
+
+Do the extraction
+
+\IDL{t=stregex(date,regex1,/sub,/ex)}
+
+Show what it looks like.
+
+\IDL{ help,t}
+
+prints 
+
+T               STRING    = Array[7, 2]
+
+\IDL{ print,t}
+
+prints \ldots
+
+2004-01-02T00:00:00.000  2004  01  02 00 00 00.000
+
+2004-02-03T01:02:03.456 2004 02 03 01 02 03.456
+
+  The first field in each line is the entire string, the last 6 are
+  the subexpressions and correspond to each of the parentheses of my
+  regular expression.
+
+
+\begin{center}
+\begin{tabular}{||c|c|c|c|c|c|c||}\hline\hline
+Whole Rexex             & 1st paren & 2nd & 3rd & 4th & 5th & 6th\\\hline\hline
+2004-01-02T00:00:00.000 & 2004      & 01  & 02  & 00  & 00  & 00.000\\
+2004-02-03T01:02:03.456 & 2004      & 02  & 03  & 01  & 02  & 03.456\\\hline
+\end{tabular}
+\end{center}
+
+
+

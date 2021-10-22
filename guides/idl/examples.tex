@@ -1,0 +1,68 @@
+\section{Examples}\label{sec:examples}
+
+\bi
+
+  \item Create an array of latitudes running from -90 to 90 in 1 degree
+  increments
+
+    \IDL{lats=findgen(181)-90}
+
+  \item Same as above, but in 1/2 degree increments
+
+    \IDL{lats=findgen(181*2)/(2*181-1)*180-90)}
+
+  \item  Create two 2-d index arrays, one for longitude, one for
+  latitude, on 1 degree grids, so that the longitudes run along the rows
+  and the latitudes along the columns (in the IDL usage of those words)
+
+    \IDL{lats=replicate(1.,360)\#(findgen(181)-90)}
+
+    \IDL{lons=findgen(360)\#replicate(1.,181)}
+
+  \item reform an array from a 2 d (M by N) to a vector having the same
+  number of elements
+
+   Let A by the M by N array, then 
+
+      \IDL{A = reform(A,M*N)}
+
+  \item Create an array which is created from 2-d array A (M by N) but
+  which is a*M by b*N
+
+
+     \IDL{B = rebin(A, a*M, b*N)}
+
+
+  \item Take a 2d array A (M by N) and turn it into a 3d array (M by N
+  by L) in which eac of the M by N sub-arrays is merely a copy of the
+  original A
+
+      \IDL{B = rebin( A, M, N, L)}
+
+  \item Find the data in an array meeting certain conditions
+
+  Assume you have a 1 degree grid of some sort of geophysical data
+  Data (181 by 360) and you want all the data between -40 south and 40 north
+  where Data is not equal to some sentinel value BadData
+
+   first create the latitude index array
+
+   \IDL{lats=(findgen(181)-90)\#replicate(1.,360)}
+
+  Now use \textit{where} with a compound statement conditioning of
+  \textit{lats} and \textit{Data}
+
+   \IDL{bad=where(data ne baddata and abs(lats) le 40,nbad, complement=good, ncomp=ngood )}
+
+   Parcel the data up into its good and bad parts.
+
+   \IDL{bad\_data = data[bad]}
+
+   \IDL{data=data[good]}
+
+    You should probably check the quantities \textit{nbad} and
+    \textit{ngood} first.
+
+  \item 
+
+\ei

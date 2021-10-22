@@ -1,0 +1,61 @@
+%% colors
+%%
+\newcommand{\IDL}[1]{\textbf{IDL$>$ #1}}
+\newcommand{\IDLOUT}[1]{\textsl{#1 }}
+\newcommand{\SH}[1]{\textsf{\% #1}}
+\newcommand{\emacs}[1]{\textbf{emacs:}\textsl{#1}}
+\newcommand{\T}{\textit{T\  }}
+\newcommand{\E}{\textit{E\  }}
+%\newcommand{\TI}[1]{\textit{T#1\  }}
+%\newcommand{\EI}[1]{\textit{E#1\  }}
+\newcommand{\IDLBUILTIN}[1]{\textit{#1}}
+%
+%
+\newenvironment{idloutmulti}%
+{\begin{minipage}[c][\height][c]{3.0in} \textit}%
+{\end{minipage}}
+%
+%
+%
+ \NC{\code}{}%
+%
+% \newlength{\ico} %hoffset for beginning of IDL code sections
+% \newlength{\cbo} %hoffset for block
+% \newlength{\dho} %default offset
+% \setlength{\ico}{0.25in}%
+% \setlength{\dho}{\hoffset}
+%
+% \newenvironment{idlcode}%
+% {\begin{code}\setlength{\hoffset}{\ico}\textit}%
+% {\end{code}}
+% %
+% %
+% \newenvironment{codeblock}%
+% {\begin{code}\setlength{\hoffset}{\hoffset+0.25in}\textit}%
+% {\end{code}}%
+% %
+%
+%\NC{\bbm}{\begin{boxedminipage}[t]{4.5}}
+%\NC{\ebm}{\end{boxedminipage}}
+
+\NC{\BIC}{\bi}
+\NC{\EIC}{\ei}
+\NC{\ICI}[1]{\item [] \prit{#1}}
+
+\newenvironment{codebox}%
+{\begin{boxedminipage}[t]{4.5in}}
+{\end{boxedminipage}}
+%
+
+\NC{\BCB}{\bi}
+\NC{\ECB}{\ei}
+\NC{\CBI}[1]{\item [] \prsl{#1}}
+
+
+%
+%
+%
+%\newcommand{\IDLCODE}[1]{\begin{idlcode}{#1}\end{idlcode}}
+%\newcommand{\IDLOUTMULTI}[1]{\begin{idloutmulti}{#1}\end{idloutmulti}}
+%%\newcommand{\IEXP}{\symbol{94}}
+

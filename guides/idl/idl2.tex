@@ -1,0 +1,55 @@
+\input{/home/whdaffer/latex/mydefs.tex}
+\input{/home/whdaffer/latex/idl/idldefs.tex}
+%\input{/usr/people/vapuser/latex/mydefs.tex}
+%\input{/usr/people/vapuser/latex/idl/idldefs.tex}
+\documentclass[11pt]{report}
+%\usepackage{calc}
+%\usepackage{boxedminipage}
+\usepackage{alltt,makeidx}
+\usepackage[none,bottom,light]{draftcopy}
+%\usepackage{helvetic}
+\usepackage{times}
+%\usepackage{courier}
+%\usepackage{zapfchan}
+%\usepackage{bookman}
+\usepackage{wasysym}
+\usepackage{listings}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{2mm}
+\title{Using IDL}
+
+\author{W. H. Daffer}
+\date{\today \\
+	Copyright \copyright 2001}
+
+\makeindex
+\begin{document}
+%\lstset{language=IDL, commentstyle=\it, basicstyle=\small,
+%        labelstyle=\tiny, labelstep=1}
+\maketitle
+\newpage
+
+\tableofcontents
+
+\newpage
+\chapter{Conventions}
+\input{conventions.tex}
+\chapter{Quick Start}
+\input{quickstart.tex}
+\chapter{File I/O}
+\input{files.tex}
+\chapter{Data Structures}
+\input{structures.tex}
+\chapter{Widgets}
+\input{widgets.tex}
+\chapter{Objects and Pointers}
+\input{objectsandpointers.tex}
+\chapter{Error Handling and Programming Style}
+\input{errorhandling.tex}
+\chapter{Various ``gotchas'' and other miscellania}
+\input{gotchas.tex}
+\addcontentsline{toc}{section}{Index}
+
+\input{idl2.ind}
+
+\end{document}

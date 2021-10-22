@@ -1,0 +1,70 @@
+\section{The quick way to learn IDL}\label{qs-learning-idl}
+
+I'm a big fan of the ``experimental'' school of learning. I believe you
+should just play around with something to learn how it works. Probably
+not a good idea with explosives, but that's not what we're dealing with
+here. It's pretty hard to make the IDL interpreter
+``blow-up''\footnote{Although I have done it}, so there's almost no
+worry that you can actually hurt anything. 
+
+Believe me, you'll learn more sitting at the IDL prompt, typing commands
+into the interpreter and examining the results by using ``print'' and
+``help'' than you'll ever learn reading a book all the way through and
+trying to write your first widget program before you've ever read a data
+file or made a simple plot.
+
+So, I encourage you to start immediately by trying things. The first
+things you need to learn are. (along with a partial list of the \textit{routines}
+used in the activity )
+
+\be
+
+  \item Creating, modifying and destroying variables, particularly
+  arrays (all the \textit{???arr} family of array creators
+  (e.g. \textit{bytarr}, \textit{fltarr}, \ldots, etc),
+  \textit{replicate}, \textit{make\_array}, the type casting functions
+  (e.g. \textit{byte}, \textit{fix}, \textit{long}, \textit{float},
+  \textit{string}, \ldots, etc.)
+
+  \item Getting help/info about variables (\textit{print},\textit{help},\textit{size},\textit{n\_elements})
+
+  \item Indexing into arrays, particularly using slices, index vectors
+  and where vectors (the \textit{?indgen} family index generators
+  (e.g. \textit{indgen}, \textit{findgen}, \ldots, etc.) and \textit{where})
+
+
+  \item Reshaping arrays (\textit{transpose}, \textit{rebin}, \textit{reform},
+\textit{congrid})
+
+  \item Calling procedures and functions
+
+\ee
+
+  After you've built up some familiarity with these things (which may
+  take you as little  as a couple of hours), you can move on to
+
+\be
+
+  \item File I/O (\textit{readf} for text and \textit{readu} for binary, the \textit{HDF\_???}
+  routines for HDF data, \textit{CDF\_???} family for NetCDF data,
+  \ldots, etc)
+
+  \item 2-d plotting (\textit{plot}, \textit{oplot}, \textit{plots})
+
+  \item 3-d plotting (\textit{surface}, \textit{shade\_surf},
+  \textit{contour})
+
+  \item Image plotting and manipulation (\textit{TV},\textit{TVSCL},\textit{TVRD},\textit{TVCLT})
+
+\ee
+
+  And finally you can grauduate to creating your own procedures and
+  functions, which will probably lead you quickly to structures. After
+  some time, you might encounter pointers, widget programming and,
+  finally, object-oriented programming.
+
+  After that, there's nothing left by object graphics (and I haven't
+  even gotten this far yet)
+
+  There's a lot to learn. The good thing is that IDL is relatively easy
+  to get started using, once you understand some simple ideas.
