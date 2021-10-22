@@ -1,0 +1,16 @@
+*.aux
+*.log
+*.ilg
+*.dvi
+*.ind
+*.ps
+*.gz
+*.save
+**/*.aux
+**/*.log
+**/*.ilg
+**/*.dvi
+**/*.ind
+**/*.ps
+**/*.gz
+**/*.save
