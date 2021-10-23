@@ -116,9 +116,18 @@ not provide shell access.'
 
 #+END_SRC
 
-  So I did the following.
+  Now we need a repository on github! Later on, we'll connect the
+  local one to the `remote' on on github.com.
+
   1. Logged onto my https://github.com account and created a new repository there.
-  2. Created at new 
+  2. Created at new repository. I used the name of the parent
+     directory: 'documents' in this case.
+
+
+#+BEGIN_SRC sh
+
+#+END_SRC
+
 
   You have to authenticate with github. T
 * Setting up github repository 
