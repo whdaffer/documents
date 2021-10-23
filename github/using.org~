@@ -1,0 +1,15 @@
+You get put files into git, but if you want to be able to access them
+from anywhere, you need to put them into something like github.com.
+
+1) You need an account github.com. Go create one. It's free if you're
+   not doing anything too big or for profit
+2) You need to get your files into git. Then into github. This
+   involves connecting a local git repository to something on github.
+
+
+* Getting files into github
+  
+* Setting up github repository 
+* git command line
+* gh command line
+* github
